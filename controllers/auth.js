@@ -52,7 +52,7 @@ exports.login = async(req, res, next)=>{
             });
         }
 
-        const accesstoken = jwt.sign({id: user._id, email : user.email, firstname : user.username, isAdmin : user.isAdmin }, process.env.JWT_SECRET_KEY,{expiresIn: `1d`});
+        const accesstoken = jwt.sign({id: user._id, email : user.email, firstname : user.firstname, isAdmin : user.isAdmin }, process.env.JWT_SECRET_KEY,{expiresIn: `1d`});
 
         // reassigning the created token 
         user.accessToken = accesstoken;
