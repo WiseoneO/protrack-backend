@@ -18,6 +18,7 @@ exports.register = async (req, res, next)=>{
                }
             ));
 
+        // encrypting the passwor
         let encryptedPassword = await bcrypt.hash(payload.password, 12);
         payload.password = encryptedPassword;
 
@@ -53,6 +54,7 @@ exports.login = async(req, res, next)=>{
 
         const accesstoken = jwt.sign({id: user._id, email : user.email, firstname : user.username, isAdmin : user.isAdmin }, process.env.JWT_SECRET_KEY,{expiresIn: `1d`});
 
+        // reassigning the created token 
         user.accessToken = accesstoken;
             await user.save();
 
