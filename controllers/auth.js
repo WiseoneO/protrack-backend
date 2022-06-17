@@ -2,6 +2,8 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const createError = require("http-errors")
 const bcrypt = require("bcrypt");
+const dotenv = require("dotenv");
+dotenv.config()
 
 exports.register = async (req, res, next)=>{
     let payload = req.body;
@@ -25,6 +27,40 @@ exports.register = async (req, res, next)=>{
         success : true,
         data : newUser
     })
+    }catch(error){
+        next(error)
+    }
+}
+
+// LOGIN
+exports.login = async(req, res, next)=>{
+    try{
+        const user = await User.findOne({email : req.body.email}).select("+password");
+        if(!user){
+            return res.status(404).json({
+                success : false,
+                message: "Invalid credentials"
+            });
+        }
+
+        const matchedPassword = await bcrypt.compare(req.body.password, user.password);
+        if(!matchedPassword){
+            return res.status(400).json({
+                success : false,
+                message: "Invalid credentials"
+            });
+        }
+
+        const accesstoken = jwt.sign({id: user._id, email : user.email, firstname : user.username, isAdmin : user.isAdmin }, process.env.JWT_SECRET_KEY,{expiresIn: `1d`});
+
+        user.accessToken = accesstoken;
+            await user.save();
+
+        res.status(200).json({
+            success : true,
+            token : accesstoken
+        })
+       
     }catch(error){
         next(error)
     }
