@@ -2,8 +2,18 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const createError = require("http-errors")
 const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
 const dotenv = require("dotenv");
 dotenv.config()
+
+const transport = nodemailer.createTransport({
+    host: process.env.MAIL_TRAP_HOST,
+    port: process.env.MAIL_TRAP_PORT,
+    auth: {
+      user: process.env.MAIL_TRAP_USER,
+      pass: process.env.MAIL_TRAP_PASSWORD
+    }
+  });
 
 exports.register = async (req, res, next)=>{
     let payload = req.body;
@@ -26,8 +36,15 @@ exports.register = async (req, res, next)=>{
 
     res.status(201).json({
         success : true,
-        data : newUser
     })
+
+    mailOptions={
+        to: payload.email,
+        from: 'protrack@support.com',
+        subject: 'Signup Successfully!',
+        html: `<h3>Welcome to PROTRACK</h3><p>Login to complete your registration <b>${newUser.firstname}</b></p>`
+   };
+   return transport.sendMail(mailOptions);
     }catch(error){
         next(error)
     }
@@ -52,7 +69,13 @@ exports.login = async(req, res, next)=>{
             });
         }
 
-        const accesstoken = jwt.sign({id: user._id, email : user.email, firstname : user.firstname, isAdmin : user.isAdmin }, process.env.JWT_SECRET_KEY,{expiresIn: `1d`});
+        const accesstoken = jwt.sign(
+            {
+                id: user._id,
+                email : user.email, 
+                firstname : user.firstname, 
+                isAdmin : user.isAdmin 
+            }, process.env.JWT_SECRET_KEY,{});
 
         // reassigning the created token 
         user.accessToken = accesstoken;
