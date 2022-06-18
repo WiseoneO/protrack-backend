@@ -32,20 +32,20 @@ const UserSchema = new mongoose.Schema({
         type : String,
         default : ""
     },
-    // industry : {
-    //     type : String,
-    //     enum : {
-    //         values : [
-    //             'Business',
-    //             'Information Technology',
-    //             'Banking',
-    //             'Education/Training',
-    //             'Telecommunication',
-    //             'Others'
-    //             ]
-    //         },
-    //     default : ""
-    // },
+    industry : {
+        type : String,
+        enum : {
+            values : [
+                'Business',
+                'Information Technology',
+                'Banking',
+                'Education/Training',
+                'Telecommunication',
+                'Others'
+                ]
+            },
+        default : ""
+    },
     job_title : {
         type : String,
         default : ""

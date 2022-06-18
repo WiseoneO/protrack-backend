@@ -10,6 +10,7 @@ dotenv.config();
 
 connectDB();
 const app = express();
+// console.log(express)
 app.use(express.json())
 // log routes visited
 app.use(morgan("common"));
