@@ -6,18 +6,20 @@ const nodemailer = require("nodemailer");
 const dotenv = require("dotenv");
 dotenv.config()
 
-const transport = nodemailer.createTransport({
-    host: process.env.MAIL_TRAP_HOST,
-    port: process.env.MAIL_TRAP_PORT,
-    auth: {
-      user: process.env.MAIL_TRAP_USER,
-      pass: process.env.MAIL_TRAP_PASSWORD
-    }
-  });
+//  transport options
 
+    const transport = nodemailer.createTransport({
+        host: process.env.MAIL_TRAP_HOST,
+        port: process.env.MAIL_TRAP_PORT,
+        auth: {
+            user: process.env.MAIL_TRAP_USER,
+            pass: process.env.MAIL_TRAP_PASSWORD
+        }
+    });
+
+// New Users Registration =>/api/protrack.com/auth/register
 exports.register = async (req, res, next)=>{
     let payload = req.body;
-
     try{
         // check if email already exist
         let users = await User.findOne({email : payload.email});
@@ -36,21 +38,25 @@ exports.register = async (req, res, next)=>{
 
     res.status(201).json({
         success : true,
-    })
+        message : `New user have been created!`
+        })
 
-    mailOptions={
-        to: payload.email,
-        from: 'protrack@support.com',
-        subject: 'Signup Successfully!',
-        html: `<h3>Welcome to PROTRACK</h3><p>Login to complete your registration <b>${newUser.firstname}</b></p>`
-   };
-   return transport.sendMail(mailOptions);
+       
+            mailOptions={
+                to: payload.email,
+                from: 'protrack@support.com',
+                subject: 'Signup Successfully!',
+                html: `<h2>Welcome to PROTRACK</h2>
+                        <p>Login to complete your registration <b>${newUser.firstname}</b></p>`
+            };
+            return transport.sendMail(mailOptions);
+
     }catch(error){
         next(error)
     }
 }
 
-// LOGIN
+// User login  =>/api/protrack.com/auth/login
 exports.login = async(req, res, next)=>{
     try{
         const user = await User.findOne({email : req.body.email}).select("+password");

@@ -5,6 +5,7 @@ const createError = require("http-errors");
 
 const connectDB = require("./config/database")
 const authRoute = require("./routes/authRoute")
+const userRoute = require("./routes/userRoute")
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -18,8 +19,9 @@ app.use(morgan("common"));
 app.use(helmet());
 
 
-// Fireing the routes
-app.use("/api/protract.com/auth/", authRoute);
+// Firing the routes
+app.use("/api/protrack.com/auth/", authRoute);
+app.use("/api/protrack.com/users/", userRoute);
 
 
 
