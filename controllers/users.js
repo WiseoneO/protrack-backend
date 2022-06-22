@@ -1,6 +1,6 @@
 const User = require("../models/User")
 
-// Getting all users =>/api/protrack.com/users/
+// Getting all users ADMIN =>/api/protrack.com/users/
 exports.getAllUsers = async (req, res, next)=>{
     const query = req.query.new;
     try{
