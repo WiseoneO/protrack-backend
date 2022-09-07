@@ -1,4 +1,4 @@
-const User = require("../models/User")
+const User = require("../infrastructure/models/User")
 
 // Getting all users ADMIN =>/api/protrack.com/users/
 exports.getAllUsers = async (req, res, next)=>{

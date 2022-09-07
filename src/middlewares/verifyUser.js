@@ -10,7 +10,7 @@ const verifyToken = async(req, res, next)=>{
     if(!authHeader || !authHeader.startsWith("Bearer")){
         return res.status(401).json({
             success : false,
-            message : "You are not authenticated"
+            message : "Access Denied!"
         })
     }
 

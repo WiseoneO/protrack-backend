@@ -1,8 +1,7 @@
 const router = require("express").Router();
-const {verifyToken,verifyTokenAndAuthorization,verifyTokenAndAdmin} = require("../middlewares/verifyUser")
-const {getAllUsers} = require("../controllers/users")
+const config = require("../../config/defaults");
 
-// Admin route =>get all users
-router.get("/", verifyTokenAndAdmin, getAllUsers)
+const {verifyToken,verifyTokenAndAuthorization,verifyTokenAndAdmin} = require("../middlewares/verifyUser")
+
 
 module.exports = router

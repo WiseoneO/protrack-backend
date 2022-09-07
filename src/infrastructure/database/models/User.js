@@ -7,26 +7,27 @@ const UserSchema = new mongoose.Schema({
     },
     lastname : {
         type : String,
-        default : ""
+        required : true,
+        trim : true
     },
     email : {
-        type : String,
-        required : true,
-        unique : true
+        type: String,
+        required: true,
+        trim: true,
+        immutable: true,
     },
-    phone_no : {
-        type : Number,
-        // required : true,
-        unique : true
-    },
-    country_code : {
-        type : Number,
-        default : ""
-    },
+    phoneNumber: {
+        phoneNo: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        countryCode: String,
+      },
     password : {
         type : String,
-        required : true,
-        select : false,
+        required: true,
+        trim: true,
     },
     company : {
         type : String,
@@ -34,36 +35,35 @@ const UserSchema = new mongoose.Schema({
     },
     industry : {
         type : String,
-        enum : {
-            values : [
+        enum :  [
                 'Business',
                 'Information Technology',
                 'Banking',
                 'Education/Training',
-                'Telecommunication',
                 'Others'
                 ]
-            },
-        default : ""
     },
     job_title : {
         type : String,
-        default : ""
     },
-    profile_picture : {
+    profile_Image : {
         type : String,
-        default : ""
     },
     isAdmin : {
         type :Boolean,
         default : false,
     },
-    accessToken : {
-        type : String,
-        default : ""
-    }
+    isDeleted : {
+        type : Boolean,
+        default : false
+    },
+    subscription: {
+        type: String,
+        enum: ['free', 'paid'],
+      },
 }, {timestamps: true}
 );
 
-module.exports = mongoose.model("User", UserSchema);
+const userModel = mongoose.model("User", UserSchema);
 
+module.exports = userModel;
