@@ -1,34 +1,37 @@
 const express = require("express");
 const morgan = require("morgan");
+const config = require("./config/defaults")
 const helmet = require("helmet");
+const logger = require("pino")();
 const createError = require("http-errors");
+const connectDB = require("./src/infrastructure/database/mongoose");
+const authRoute = require("./src/routes/authRoute");
+const userRoute = require("./src/routes/userRoute");
 
-const connectDB = require("./config/database")
-const authRoute = require("./routes/authRoute")
-const dotenv = require("dotenv");
-dotenv.config();
-
-connectDB();
 const app = express();
+connectDB();
+
+// console.log(express)
 app.use(express.json())
+
 // log routes visited
-app.use(morgan("common"));
+// app.use(morgan("common"));
+
 // helps secure our express app by setting various HTTP head099Mers
 app.use(helmet());
 
 
-// Fireing the routes
-app.use("/api/protract.com/auth/", authRoute);
+// Firing the routes
 
-
-
-
-
-
-
-
-
-
+app.get("/protrack.com/api/v1/", (req, res, next)=>{
+    res.status(200).json({
+     message : "API v1 is running",
+     env: config.env,
+     projectName: config.projectName
+    })
+ })
+app.use("/protrack.com/api/v1/auth/", authRoute);
+app.use("/protrack.com/api/v1/users/", userRoute);
 
 // Not found route
 app.use(async (req, res, next) => {
@@ -45,6 +48,6 @@ app.use(async (error, req, res, next) => {
     });
 });
 
-app.listen(process.env.PORT || 6000, ()=>{
-    console.log(`Server started on port ${process.env.PORT}`)
+app.listen(config.port, ()=>{
+    logger.info(`Server started on port ${config.port}`)
 })
