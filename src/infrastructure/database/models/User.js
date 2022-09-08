@@ -52,6 +52,7 @@ const UserSchema = new mongoose.Schema({
     subscription: {
         type: String,
         enum: ['free', 'paid'],
+        default: "free",
       },
     tasks:{
 

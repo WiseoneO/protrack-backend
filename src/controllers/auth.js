@@ -32,10 +32,10 @@ exports.login = async (req, res) =>{
         if(!validPass) throw new Error('Your email or password in incorrect');
 
         // generate jwt token
-        const token = await jwt.sign({
+        const token = jwt.sign({
             id: user.id,
-            fullName : user.full_name,
-            email : user.email,
+            fullName: user.full_name,
+            email: user.email,
             subscription: user.subscription,
             isDeleted: user.isDeleted
         }, config.userSecrete);
