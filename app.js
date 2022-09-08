@@ -1,6 +1,6 @@
 const express = require("express");
-const morgan = require("morgan");
-const config = require("./config/defaults")
+// const morgan = require("morgan");
+const config = require("./src/config/defaults")
 const helmet = require("helmet");
 const logger = require("pino")();
 const createError = require("http-errors");

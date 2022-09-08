@@ -1,4 +1,4 @@
-const config = require("../../../config/defaults")
+const config = require("../../config/defaults")
 
 const transport = nodemailer.createTransport({
     host: process.env.MAIL_TRAP_HOST,
@@ -19,4 +19,4 @@ const mailOptions={
             };
             return transport.sendMail(mailOptions);
 
-module.exports = { mailOptions}
+module.exports = {mailOptions}

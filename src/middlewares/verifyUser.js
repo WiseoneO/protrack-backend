@@ -1,10 +1,9 @@
 const jwt = require("jsonwebtoken");
-const dotenv = require("dotenv");
-dotenv.config();
+
 
 // verify the token
 const verifyToken = async(req, res, next)=>{
-    const authHeader = req.headers.token;
+    const authHeader = req.headers.authorization;
 
     // check if user is authenticated
     if(!authHeader || !authHeader.startsWith("Bearer")){
