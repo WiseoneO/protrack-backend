@@ -1,4 +1,4 @@
-const userModel = require("../infrastructure/database/models/User");
+const userModel = require("../../../infrastructure/database/models/User");
 const bcrypt = require("bcrypt");
 const {createUserSchema} = require("../validations/userValidation")
 
@@ -48,10 +48,7 @@ exports.signupUser = async (req, res)=>{
                 res
                   .status(500)
                   .json({ success: false, msg: `${error.message}` });
-                throw new Error(`${error.message}`);
               }
-              throw error;
-        }
-            
     }
     
+}

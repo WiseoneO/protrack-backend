@@ -5,8 +5,8 @@ const helmet = require("helmet");
 const logger = require("pino")();
 const createError = require("http-errors");
 const connectDB = require("./src/infrastructure/database/mongoose");
-const authRoute = require("./src/routes/authRoute");
-const userRoute = require("./src/routes/userRoute");
+const authRoute = require("./src/interface/http/routes/authRoute");
+const userRoute = require("./src/interface/http/routes/userRoute");
 const cors = require('cors')
 
 const app = express();
@@ -32,8 +32,8 @@ app.get("/protrack.com/api/v1/", (req, res, next)=>{
      projectName: config.projectName
     })
  })
-app.use("protrack.com/api/v1/auth/", authRoute);
-app.use("protrack.com/api/v1/users/", userRoute);
+app.use("/protrack.com/api/v1/auth/", authRoute);
+app.use("/protrack.com/api/v1/users/", userRoute);
 
 // Not found route
 app.use(async (req, res, next) => {
