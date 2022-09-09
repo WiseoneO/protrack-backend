@@ -1,7 +1,7 @@
-const userModel = require("../infrastructure/database/models/User");
+const userModel = require("../../../infrastructure/database/models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const config = require("../config/defaults");
+const config = require("../../../config/defaults");
 const {signInValidation} = require("../validations/userValidation")
 
 
@@ -54,9 +54,7 @@ exports.login = async (req, res) =>{
             res
               .status(500)
               .json({ success: false, msg: `${error.message}` });
-            throw new Error(`${error.message}`);
           }
-          throw error;
     }
     
 }
