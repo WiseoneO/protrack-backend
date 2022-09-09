@@ -1,12 +1,13 @@
 const express = require("express");
-const morgan = require("morgan");
-const config = require("./config/defaults")
+// const morgan = require("morgan");
+const config = require("./src/config/defaults")
 const helmet = require("helmet");
 const logger = require("pino")();
 const createError = require("http-errors");
 const connectDB = require("./src/infrastructure/database/mongoose");
 const authRoute = require("./src/routes/authRoute");
 const userRoute = require("./src/routes/userRoute");
+const cors = require('cors')
 
 const app = express();
 connectDB();
@@ -14,6 +15,7 @@ connectDB();
 // console.log(express)
 app.use(express.json())
 
+app.use(cors());
 // log routes visited
 // app.use(morgan("common"));
 
@@ -30,8 +32,8 @@ app.get("/protrack.com/api/v1/", (req, res, next)=>{
      projectName: config.projectName
     })
  })
-app.use("/protrack.com/api/v1/auth/", authRoute);
-app.use("/protrack.com/api/v1/users/", userRoute);
+app.use("protrack.com/api/v1/auth/", authRoute);
+app.use("protrack.com/api/v1/users/", userRoute);
 
 // Not found route
 app.use(async (req, res, next) => {

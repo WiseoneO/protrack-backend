@@ -1,14 +1,9 @@
 const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema({
-    firstname : {
+    full_name : {
         type:String,
         required : true
-    },
-    lastname : {
-        type : String,
-        required : true,
-        trim : true
     },
     email : {
         type: String,
@@ -49,10 +44,7 @@ const UserSchema = new mongoose.Schema({
     profile_Image : {
         type : String,
     },
-    isAdmin : {
-        type :Boolean,
-        default : false,
-    },
+    messages: [],
     isDeleted : {
         type : Boolean,
         default : false
@@ -60,7 +52,11 @@ const UserSchema = new mongoose.Schema({
     subscription: {
         type: String,
         enum: ['free', 'paid'],
+        default: "free",
       },
+    tasks:{
+
+    }
 }, {timestamps: true}
 );
 

@@ -1,24 +1,57 @@
-const User = require("../infrastructure/models/User")
+const userModel = require("../infrastructure/database/models/User");
+const bcrypt = require("bcrypt");
+const {createUserSchema} = require("../validations/userValidation")
 
-// Getting all users ADMIN =>/api/protrack.com/users/
-exports.getAllUsers = async (req, res, next)=>{
-    const query = req.query.new;
-    try{
-        const users =  query ? await User.find().sort({_id : -1}).limit(2) : await User.find() ;
-    if(users.length === 0){
-        return res.status(400).json({
-            success : true,
-            message : `No user found`
-        })
+
+exports.signupUser = async (req, res)=>{
+        try{
+            let {
+                full_name,
+                phoneNumber: {phoneNo, countryCode},
+                email,
+                password ,
+                } = req.body;
+
+                // validating inputs
+                const {error} = createUserSchema(req.body);
+                if(error){
+                    return res.status(400).json({
+                        success : false,
+                        message : error.details[0].message
+                    });
+                }
+    
+                // check if user exist
+                let isUser = await userModel.findOne({email :email});
+                if(isUser) throw new Error(`User with this email already exist`);
+
+                let hashedPassword = await bcrypt.hash(password, 12);
+                password = hashedPassword;
+
+                let user = await userModel.create({
+                    full_name,
+                    phoneNumber: {phoneNo, countryCode},
+                    email,
+                    password,
+                });
+
+            await user.save();
+            delete user._doc.password;
+            return res.status(201).json({
+                success : true,
+                msg: 'User created successfully',
+                data: user
+            })
+
+        }catch(error){
+            if (error instanceof Error) {
+                res
+                  .status(500)
+                  .json({ success: false, msg: `${error.message}` });
+                throw new Error(`${error.message}`);
+              }
+              throw error;
+        }
+            
     }
-
-    res.status(200).json({
-        success : true,
-        total_users : users.length,
-        data : users
-    })
-
-    }catch(error){
-        next(error)
-    }
-}
+    

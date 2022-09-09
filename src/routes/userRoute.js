@@ -1,7 +1,8 @@
 const router = require("express").Router();
-const config = require("../../config/defaults");
+const {signupUser}= require("../controllers/users")
+
 
 const {verifyToken,verifyTokenAndAuthorization,verifyTokenAndAdmin} = require("../middlewares/verifyUser")
 
-
-module.exports = router
+router.route("/signUp").post(signupUser)
+module.exports = router 
