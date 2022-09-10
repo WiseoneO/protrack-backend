@@ -49,14 +49,18 @@ const UserSchema = new mongoose.Schema({
         type : Boolean,
         default : false
     },
+    isVerified: {
+        type : Boolean,
+        default : false,
+    },
     subscription: {
         type: String,
         enum: ['free', 'paid'],
-        default: "free",
       },
     tasks:{
 
-    }
+    },
+
 }, {timestamps: true}
 );
 

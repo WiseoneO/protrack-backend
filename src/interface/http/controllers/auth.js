@@ -4,7 +4,6 @@ const bcrypt = require("bcrypt");
 const config = require("../../../config/defaults");
 const {signInValidation} = require("../validations/userValidation")
 
-
 exports.login = async (req, res) =>{
     try{
         const {email, password} = req.body;
@@ -57,6 +56,44 @@ exports.login = async (req, res) =>{
           }
     }
     
+}
+
+exports.verifyToken = async (req, res)=>{
+    try{
+        const userId = req.params.id;
+        const token = req.params.token;
+
+        const user = await userModel.findOne({
+            _id : userId,
+            isDeleted : false
+        },
+        {password : 0}
+        );
+
+        if(!user) throw new Error(`User with this Id not found`);
+
+        const secret = config.userEmailSecret;
+        const payload = jwt.verify(token, `${secret}`);
+        if (!payload) throw new Error('Invalid Token');
+
+        user.isVerified = true;
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            msg: `Email Verification Successful`,
+            data: user,
+        });
+    }catch(error){
+        if (error instanceof Error) {
+            res
+              .status(500)
+              .json({ success: false, msg: `${error.message}` });
+          }
+    }
+    
+
 }
 
 

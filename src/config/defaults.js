@@ -9,13 +9,17 @@ const config = {
 
     // JWT
     userSecrete : process.env.USER_JWT_SECRET_KEY,
+    userEmailSecret : process.env.USER_EMAIL_VERIFICATION_SECRET,
     
     // email
     emailHost : process.env.MAIL_TRAP_HOST,
     emailPort : process.env.MAIL_TRAP_PORT,
     mailuserid : process.env.MAIL_TRAP_USER,
     mailPassword : process.env.MAIL_TRAP_PASSWORD
+
+  
 }
+
 
 
 module.exports = config
