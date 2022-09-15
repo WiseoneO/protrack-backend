@@ -41,7 +41,7 @@ const UserSchema = new mongoose.Schema({
     job_title : {
         type : String,
     },
-    profile_Image : {
+    avatar : {
         type : String,
     },
     messages: [],

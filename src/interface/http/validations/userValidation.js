@@ -26,6 +26,15 @@ const Joi = require('joi');
         return schema.validate(user);
       };
 
+    exports.forgotPasswordValidation = (user) => {
+        const schema = Joi.object({
+        //   oldPassword: Joi.string().required().min(6),
+          newPassword: Joi.string().required().min(6),
+          confirmPassword: Joi.string().required().min(6),
+        }).unknown();
+        return schema.validate(user);
+      };
+
 
 
 
