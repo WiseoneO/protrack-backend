@@ -38,6 +38,10 @@ const UserSchema = new mongoose.Schema({
                 'Others'
                 ]
     },
+    team: {
+        type  : Array,
+        default : [], 
+    },
     job_title : {
         type : String,
     },
@@ -58,12 +62,24 @@ const UserSchema = new mongoose.Schema({
         enum: ['free', 'paid'],
       },
     tasks:{
-
+        individual : {
+            type: String,
+            ref: 'Individual',
+        },
+        team : {
+            type: String,
+            ref: 'TeamTask',
+        },
+        department : {
+            type: String,
+            ref: 'Department',
+        }
+        
     },
 
 }, {timestamps: true}
 );
 
-const userModel = mongoose.model("User", UserSchema);
+const UserModel = mongoose.model("User", UserSchema);
 
-module.exports = userModel;
+module.exports = UserModel;

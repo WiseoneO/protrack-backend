@@ -8,7 +8,7 @@ const config = {
     projectName : process.env.PROJECT_NAME,
 
     // JWT
-    userSecrete : process.env.USER_JWT_SECRET_KEY,
+    userSecret : process.env.USER_JWT_SECRET_KEY,
     userEmailSecret : process.env.USER_EMAIL_VERIFICATION_SECRET,
     userReset : process.env.USER_RESET,
     

@@ -1,10 +1,10 @@
-const userModel = require("../../../infrastructure/database/models/User");
+const userModel = require("../../../infrastructure/database/models/user");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const config = require("../../../config/defaults");
 const {passwordReset} = require("../../../infrastructure/libs/mailer");
 const {signInValidation,forgotPasswordValidation} = require("../validations/userValidation");
-const {generatePassword} = require("../../http/utils/passwordGenerator");
+const {generatePassword} = require("../utils/passwordGenerator");
 
 exports.login = async (req, res) =>{
     try{
@@ -32,13 +32,13 @@ exports.login = async (req, res) =>{
         if(!validPass) throw new Error('Your email or password in incorrect');
 
         // generate jwt token
-        const token = jwt.sign({
-            id: user.id,
+        const token = await jwt.sign({
+            _id: user._id,
             fullName: user.full_name,
             email: user.email,
             subscription: user.subscription,
             isDeleted: user.isDeleted
-        }, config.userSecrete);
+        }, config.userSecret);
 
         res.status(200)
         // .header('auth-token', token)

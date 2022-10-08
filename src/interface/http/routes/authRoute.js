@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const {login,verifyToken,sendPasswordLink, resetUserPassword} = require("../controllers/auth");
+const {login,verifyToken,sendPasswordLink, resetUserPassword} = require("../controllers/authContorller");
 
 
 router.route("/login").post(login)

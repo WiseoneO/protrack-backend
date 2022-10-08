@@ -7,6 +7,7 @@ const createError = require("http-errors");
 const connectDB = require("./src/infrastructure/database/mongoose");
 const authRoute = require("./src/interface/http/routes/authRoute");
 const userRoute = require("./src/interface/http/routes/userRoute");
+const taskRoute = require("./src/interface/http/routes/taskRoute");
 const cors = require('cors')
 
 const app = express();
@@ -33,7 +34,8 @@ app.get("/protrack.com/api/v1/", (req, res, next)=>{
     })
  })
 app.use("/protrack.com/api/v1/auth/", authRoute);
-app.use("/protrack.com/api/v1/users/", userRoute);
+app.use("/protrack.com/api/v1/user/", userRoute);
+app.use("/protrack.com/api/v1/user/task", taskRoute);
 
 // Not found route
 app.use(async (req, res, next) => {
