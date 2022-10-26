@@ -4,14 +4,7 @@ const individualSchema = new mongoose.Schema({
     created_By: {
         type: String,
         ref: 'User',
-        // required: true,
-        role: "Admin" 
     },
-    members : [
-            {
-            type : String,
-            },
-    ],
     title : {
         type: String
     },
@@ -26,7 +19,7 @@ const individualSchema = new mongoose.Schema({
     },
     status : {
         type : String,
-        enum : ["Pending", "in Progress", "Completed"],
+        enum : ["Pending", "In-Progress", "Completed"],
         default : "Pending"
 
     },

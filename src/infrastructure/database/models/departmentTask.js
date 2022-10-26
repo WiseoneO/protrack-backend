@@ -1,17 +1,24 @@
 const mongoose = require("mongoose");
 
+// const memberSchema = new mongoose.Schema({
+//     type : Array,
+//     default : [],
+//     role : {
+//         type : String,
+//         enum : ['admin', 'member'],
+//         default : 'member'
+//     }
+// });
 const departmentSchema = new mongoose.Schema({
     created_By: {
         type: String,
         ref: 'User',
-        // required: true,
-        role: "Admin" 
     },
-    members : [
-            {
-            type : String,
-            },
-    ],
+    // members : [memberSchema],
+    members : {
+        type: Array,
+        default: [],
+    },
     title : {
         type: String
     },
@@ -25,7 +32,7 @@ const departmentSchema = new mongoose.Schema({
     },
     status : {
         type : String,
-        enum : ["Pending", "in Progress", "Completed"],
+        enum : ["Pending", "In-Progress", "Completed"],
         default : "Pending"
     },
     time_frame : {

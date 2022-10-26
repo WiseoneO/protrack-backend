@@ -113,34 +113,22 @@ exports.changePassword = async (req, res)=>{
         }
 }
 
-// create team
-exports.createTeam = async (req, res)=>{
-    try{
-        const userId = req.params.id;
-        const currentUser = await userModel.findById({_id : req.user._id});
-        try{
-            if(!currentUser.team.includes(userId)){
-                const userCheck = await userModel.findOne({_id : userId});
-                if(!userCheck) throw new Error (`User not found`);
-                if(userId === currentUser) throw new Error (`Not allowed `);
-                await currentUser.updateOne({$push: {team: userId}});
-                // await userCheck.updateOne({$push: {team: currentUser.id}});
-                res.status(200).json({
-                    success: true,
-                    msg: `Added successfully!`,
-                    data: currentUser,
-                  });
-            }else{
-            throw new Error(`Already a team member`);
-            }
-        }catch(error){
-            throw error;
-        }
-    }catch(error){
-        if (error instanceof Error) {
-            res
-            .status(500)
-            .json({ success: false, msg: `${error}` });
-        }
-    }
+// update user Profile
+exports.update = async (req, res) =>{
+
+}
+
+// soft delete User
+exports.softDelete = async (req, res) =>{
+
+}
+
+// permanet delete
+exports.permanentDelete = async (req, res) =>{
+
+}
+
+// View trash
+exports.Trash = async (req, res) =>{
+    
 }

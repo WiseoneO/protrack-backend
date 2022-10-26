@@ -1,17 +1,14 @@
 const mongoose = require("mongoose");
-
 const teamSchema = new mongoose.Schema({
     created_By: {
         type: String,
         ref: 'User',
-        // required: true,
-        role: "Admin" 
     },
-    members : [
-            {
-            type : String,
-            },
-    ],
+    members : {
+        type: Array,
+        default: [],
+    },
+
     title : {
         type: String
     },
@@ -25,7 +22,7 @@ const teamSchema = new mongoose.Schema({
     },
     status : {
         type : String,
-        enum : ["Pending", "in Progress", "Completed"],
+        enum : ["Pending", "In-Progress", "Completed"],
         default : "Pending"
     },
     time_frame : {
