@@ -1,4 +1,9 @@
 const HTTP_STATUS = require('http-status-codes');
+const {
+  superAdminPermissions,
+  adminPermissions,
+  taskAdminPermissions
+} = require("../utils/permissions")
 
 const checkPermission = (permission) => {
   return function (req, res, next) {

@@ -1,24 +1,21 @@
 const mongoose = require("mongoose");
 
-// const memberSchema = new mongoose.Schema({
-//     type : Array,
-//     default : [],
-//     role : {
-//         type : String,
-//         enum : ['admin', 'member'],
-//         default : 'member'
-//     }
-// });
+const memberSchema = new mongoose.Schema({
+    memberId : {
+        type : String
+    },
+    role : {
+        type : String,
+        enums : ["admin","member"],
+        default : 'member'
+    }
+})
 const departmentSchema = new mongoose.Schema({
     created_By: {
         type: String,
         ref: 'User',
     },
-    // members : [memberSchema],
-    members : {
-        type: Array,
-        default: [],
-    },
+    members : [memberSchema],
     title : {
         type: String
     },

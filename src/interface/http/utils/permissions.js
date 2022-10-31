@@ -28,9 +28,33 @@ const superAdminPermissions = [
       ],
     },
   ];
+  const taskAdminPermissions = [
+    {
+      role: 'admin',
+      description: 'can perform other admin functionalities except delete',
+      permissions: [
+        'create-admin',
+        'update-task',
+        'delete-members',
+      ],
+    },
+  ];
+  const moderatorPermissions = [
+    {
+      role: 'admin',
+      description: 'can perform other admin functionalities except delete',
+      permissions: [
+        'create-admin',
+        'update-task',
+        'delete-members',
+      ],
+    },
+  ];
   
-  export {
+  module.exports =  {
     superAdminPermissions,
     adminPermissions,
+    taskAdminPermissions,
+    moderatorPermissions
   };
   
