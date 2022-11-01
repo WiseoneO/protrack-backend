@@ -8,14 +8,23 @@ const config = {
     projectName : process.env.PROJECT_NAME,
 
     // JWT
-    userSecrete : process.env.USER_JWT_SECRET_KEY,
+    userSecret : process.env.USER_JWT_SECRET_KEY,
+    userEmailSecret : process.env.USER_EMAIL_VERIFICATION_SECRET,
+    userReset : process.env.USER_RESET,
     
     // email
     emailHost : process.env.MAIL_TRAP_HOST,
     emailPort : process.env.MAIL_TRAP_PORT,
     mailuserid : process.env.MAIL_TRAP_USER,
-    mailPassword : process.env.MAIL_TRAP_PASSWORD
+    mailPassword : process.env.MAIL_TRAP_PASSWORD,
+
+  
+    // CLOUDINARY
+    cloudName : process.env.CLOUD_NAME,
+    cloudKey : process.env.CLOUDINARY_API_KEY,
+    cloudSecret : process.env.CLOUDINARY_API_SECRET
 }
+
 
 
 module.exports = config

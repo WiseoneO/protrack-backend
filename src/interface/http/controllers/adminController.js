@@ -1,0 +1,1 @@
+const userModel = require("../../../infrastructure/database/models/User")

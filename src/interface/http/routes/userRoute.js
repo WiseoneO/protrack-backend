@@ -1,8 +1,9 @@
 const router = require("express").Router();
-const {signupUser}= require("../controllers/users")
+const {signupUser,changePassword,uploadAvatar}= require("../controllers/usersController")
 
+const verifyToken= require("../middlewares/verifyUser")
 
-const {verifyToken,verifyTokenAndAuthorization,verifyTokenAndAdmin} = require("../middlewares/verifyUser")
-
-router.route("/signUp").post(signupUser)
+router.post("/signUp", signupUser);
+router.put("/change-password", verifyToken,changePassword);
+// router.route("/upload-avatar/:id/upload", verifyToken).post(uploadAvatar)
 module.exports = router 

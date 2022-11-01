@@ -7,6 +7,7 @@ const createError = require("http-errors");
 const connectDB = require("./src/infrastructure/database/mongoose");
 const authRoute = require("./src/interface/http/routes/authRoute");
 const userRoute = require("./src/interface/http/routes/userRoute");
+const taskRoute = require("./src/interface/http/routes/taskRoute");
 const cors = require('cors')
 
 const app = express();
@@ -25,15 +26,16 @@ app.use(helmet());
 
 // Firing the routes
 
-app.get("/protrack.com/api/v1/", (req, res, next)=>{
+app.get("/api/v1/", (req, res, next)=>{
     res.status(200).json({
      message : "API v1 is running",
      env: config.env,
      projectName: config.projectName
     })
  })
-app.use("/protrack.com/api/v1/auth/", authRoute);
-app.use("/protrack.com/api/v1/users/", userRoute);
+app.use("/api/v1/auth/", authRoute);
+app.use("/api/v1/user/", userRoute);
+app.use("/api/v1/user/task", taskRoute);
 
 // Not found route
 app.use(async (req, res, next) => {

@@ -38,10 +38,14 @@ const UserSchema = new mongoose.Schema({
                 'Others'
                 ]
     },
+    team: {
+        type  : Array,
+        default : [], 
+    },
     job_title : {
         type : String,
     },
-    profile_Image : {
+    avatar : {
         type : String,
     },
     messages: [],
@@ -49,17 +53,33 @@ const UserSchema = new mongoose.Schema({
         type : Boolean,
         default : false
     },
+    isVerified: {
+        type : Boolean,
+        default : false,
+    },
     subscription: {
         type: String,
         enum: ['free', 'paid'],
-        default: "free",
       },
     tasks:{
+        individual : {
+            type: String,
+            ref: 'Individual',
+        },
+        team : {
+            type: String,
+            ref: 'TeamTask',
+        },
+        department : {
+            type: String,
+            ref: 'Department',
+        }
+        
+    },
 
-    }
 }, {timestamps: true}
 );
 
-const userModel = mongoose.model("User", UserSchema);
+const UserModel = mongoose.model("User", UserSchema);
 
-module.exports = userModel;
+module.exports = UserModel;

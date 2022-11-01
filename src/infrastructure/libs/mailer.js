@@ -1,22 +1,71 @@
-const config = require("../../config/defaults")
+const config = require("../../config/defaults");
+const nodemailMailgun = require("nodemailer-mailgun-transport");
+const nodemailer = require("nodemailer");
+const logger = require("pino")();
+const dotenv = require("dotenv").config();
+const auth = {
+  auth: {
+    api_key: `${process.env.MAILGUN_API_KEY}`,
+    domain: `${process.env.MAILGUN_DOMAIN}`,
+  }
+}
 
-const transport = nodemailer.createTransport({
-    host: process.env.MAIL_TRAP_HOST,
-    port: process.env.MAIL_TRAP_PORT,
-    auth: {
-        user: process.env.MAIL_TRAP_USER,
-        pass: process.env.MAIL_TRAP_PASSWORD
+
+let transporter = nodemailer.createTransport(nodemailMailgun(auth));
+
+exports.sendWelcomeMail = async (email, full_name, link)=>{
+  let options = {
+    from : `info-noreply@protrack.com`,
+    to : `${email}`,
+    subject : `Welcome`,
+    text : `
+    Hi ${full_name},
+    
+    Welcome to Protrack, please the link below to verify your account
+
+    link: ${link}
+
+    Regards,
+    Protrack    
+    `
+  }
+
+  // console.log(options.body);
+
+  transporter.sendMail(options, (err, info)=> {
+    if(err){
+      console.log(err);
+    }else{
+      console.log(info)
     }
-});
+  })
+}
 
+exports.passwordReset = async (email, full_name, link)=>{
+  let options = {
+    from : `ogborogee@gmail.com`,
+    to : `${email}`,
+    subject : `Password Reset`,
+    body : `
+    Hi ${full_name},
+    
+    A password reset was requested for your account. Click on the link
+    below to reset your password
 
-const mailOptions={
-                to: payload.email,
-                from: 'protrack@support.com',
-                subject: 'Signup Successfully!',
-                html: `<h2>Welcome to PROTRACK</h2>
-                        <p>Login to complete your registration <b>${newUser.firstname}</b></p>`
-            };
-            return transport.sendMail(mailOptions);
+    link: ${link} 
 
-module.exports = {mailOptions}
+    Regards:
+    Protrack    
+    `
+  }
+
+  console.log(options.body)
+
+  transporter.sendMail(options, (err, info)=> {
+    if(err){
+      console.log(err.message);
+    }else{
+      console.log(info)
+    }
+  })
+}
