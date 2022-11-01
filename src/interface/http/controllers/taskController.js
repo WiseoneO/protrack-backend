@@ -17,7 +17,6 @@ exports.CreateIndividualTask = async (req, res) => {
     try {
         const {title,description,department,status,time_frame,start_date} = req.body;
         const created_By = req.user._id;
-
         // Joi Task Schema Validation 
         const {error} = createTaskSchema(req.body);
         if (error) {
@@ -26,6 +25,7 @@ exports.CreateIndividualTask = async (req, res) => {
                 message: error.details[0].message
             });
         }
+        try{
             const individualTask = await individualModel.create({
                 title,
                 description,
@@ -40,6 +40,9 @@ exports.CreateIndividualTask = async (req, res) => {
                 msg: `Task created successfully.`,
                 data: individualTask,
             });
+        }catch(error){
+            throw error;
+        }
     } catch (error) {
         if (error instanceof Error) {
             res.status(500).json({
@@ -452,10 +455,27 @@ exports.removeDepartmentMember = async (req, res) =>{
 }
 
 // Deleting a task
-
 exports.deleteIndividualTask = async (req, res)=>{
     try{
-
+        const taskId = req.params.taskId;
+        // console.log(taskId)
+        try{
+            const verifyTask = await individualModel.findByIdAndRemove({
+                _id : taskId,
+                created_By : req.user._id
+            });
+            if(!verifyTask){ 
+                throw Error ('Task not found!')
+            }else if(verifyTask.created_By !== req.user._id){
+                throw Error( 'Access denied!')
+            }
+            res.status(200).json({
+                success : true,
+                msg : 'Task deleted successfully'
+            })
+        }catch(error){
+            throw error
+        }
     }catch(error){
         if(error instanceof Error){
             res.status(500).json({
@@ -465,3 +485,118 @@ exports.deleteIndividualTask = async (req, res)=>{
         }
     }
 } 
+// Deleting a team task
+exports.deleteTeamTask = async (req, res)=>{
+    try{
+        const taskId = req.params.taskId;
+        // console.log(taskId)
+        try{
+            const verifyTask = await teamModel.findByIdAndRemove({
+                _id : taskId,
+                created_By : req.user._id
+            });
+            if(!verifyTask){ 
+                throw Error ('Task not found!')
+            }else if(verifyTask.created_By !== req.user._id){
+                throw Error( 'Access denied!')
+            }
+            res.status(200).json({
+                success : true,
+                msg : 'Task deleted successfully'
+            })
+        }catch(error){
+            throw error
+        }
+    }catch(error){
+        if(error instanceof Error){
+            res.status(500).json({
+                success: false,
+                msg: `${error.message}`
+            });
+        }
+    }
+} 
+// Deleting a task
+exports.deleteDepartmentTask = async (req, res)=>{
+    try{
+        const taskId = req.params.taskId;
+        // console.log(taskId)
+        try{
+            const verifyTask = await departmentModel.findByIdAndRemove({
+                _id : taskId,
+                created_By : req.user._id
+            });
+            if(!verifyTask){ 
+                throw Error ('Task not found!')
+            }else if(verifyTask.created_By !== req.user._id){
+                throw Error( 'Access denied!')
+            }
+            res.status(200).json({
+                success : true,
+                msg : 'Task deleted successfully'
+            })
+        }catch(error){
+            throw error
+        }
+    }catch(error){
+        if(error instanceof Error){
+            res.status(500).json({
+                success: false,
+                msg: `${error.message}`
+            });
+        }
+    }
+} 
+
+// Fetch User Tasks
+exports.allUserTasks = async (req, res)=>{
+    try{
+        const query = {created_By: req.user._id}
+        const tasks = await individualModel.find(query).sort({createdAt:1});
+        if(tasks.length === 0) res
+            .status(HTTP_STATUS.StatusCodes.OK)
+            .json({success: true, msg : 'No task found!'})
+
+            res.status(HTTP_STATUS.StatusCodes.OK).json({
+                success : 'true',
+                taskTotal : tasks.length,
+                msg : 'Data retrieved successfully',
+                data : tasks
+            })
+
+    }catch(error){
+        if(error instanceof Error){
+            res.status(500).json({
+                success: false,
+                msg: `${error.message}`
+            });
+        }
+    }
+}
+// Fetch specific User Tasks
+exports.singleUserTasks = async (req, res)=>{
+    const taskId = req.params.taskId;
+    const query = {_id : taskId}
+    try{
+        const verifyTask = await individualModel.findById(query)
+        if(verifyTask.created_By !== req.user._id) throw Error('No task found');
+
+        if(verifyTask.length === 0) res
+            .status(HTTP_STATUS.StatusCodes.OK)
+            .json({success: true, msg : 'No task found!'})
+
+            res.status(HTTP_STATUS.StatusCodes.OK).json({
+                success : 'true',
+                msg : 'Data retrieved successfully',
+                data : verifyTask
+            })
+
+    }catch(error){
+        if(error instanceof Error){
+            res.status(500).json({
+                success: false,
+                msg: `${error.message}`
+            });
+        }
+    }
+}
