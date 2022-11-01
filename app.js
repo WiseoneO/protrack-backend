@@ -53,5 +53,5 @@ app.use(async (error, req, res, next) => {
 });
 
 app.listen(config.port, ()=>{
-    logger.info(`Server started on port ${config.port}`)
+    logger.info(`Server started on port`)
 })
