@@ -33,9 +33,9 @@ app.get("/protrack.com/api/v1/", (req, res, next)=>{
      projectName: config.projectName
     })
  })
-app.use("/protrack.com/api/v1/auth/", authRoute);
-app.use("/protrack.com/api/v1/user/", userRoute);
-app.use("/protrack.com/api/v1/user/task", taskRoute);
+app.use("/api/v1/auth/", authRoute);
+app.use("/api/v1/user/", userRoute);
+app.use("/api/v1/user/task", taskRoute);
 
 // Not found route
 app.use(async (req, res, next) => {
