@@ -9,7 +9,6 @@ const verifyToken = async (req, res, next)=>{
             success : false,
             message : "Access Denied!"
         })
-        throw new Error(`Access Denied!`);
     }
 
     const token = authHeader.split(" ")[1];

@@ -11,7 +11,7 @@ const {
     adminPermissions,
     taskAdminPermissions,
     moderatorPermissions
-  }= require("../utils/permissions")
+}= require("../utils/permissions")
 // Create Task
 exports.CreateIndividualTask = async (req, res) => {
     try {
@@ -53,7 +53,6 @@ exports.CreateIndividualTask = async (req, res) => {
 // Create team task
 exports.createTeamTask = async (req, res)=>{
     const {title,description,department,status,time_frame,start_date} = req.body;
-    const {email} = req.user;
 
     try{
         // Joi Task Schema Validation 
@@ -93,7 +92,6 @@ exports.createTeamTask = async (req, res)=>{
 // Create department Task
 exports.departmentTask = async(req, res)=>{
     const {title,description,department,status,time_frame,start_date} = req.body;
-    const {email} = req.user;
 
     try{
         const task = await departmentModel.create({
@@ -106,7 +104,7 @@ exports.departmentTask = async(req, res)=>{
             created_By : req.user._id
         });
 
-        await task.members.push({email : email, role : "admin"});
+        await task.members.push({memberId : req.user._id, role : "admin"});
         await task.save()
             res.status(201).json({
             success : true,
@@ -183,7 +181,7 @@ exports.updateTeamTask = async(req, res) =>{
 
             // checking for the role of the current user
             const currentUser = verifyTask.members.find((member) => member.memberId === req.user._id);
-            if(!currentUser) throw Error ('You are not a member of this team');
+            if(!currentUser) throw Error ('You are not a member or an admin');
 
             // authorize admins this operation
             if(currentUser.role !== 'admin') throw Error ('you are not authorized');
@@ -231,7 +229,8 @@ exports.updatedepartmentTask = async(req, res) =>{
 
             // checking for the role of the current user
             const currentUser = verifyTask.members.find((member) => member.memberId === req.user._id);
-            if(!currentUser) throw Error ('You are not a member of this team')
+            if(!currentUser) throw Error ('You are not a member or an admin');
+
 
             // authorize admins this operation
             if(currentUser.role !== 'admin') throw Error ('you are not authorized');
@@ -279,6 +278,7 @@ exports.addTeamMember = async (req, res, next)=>{
             const ObjectToFind = userId;
             const isObjectPresent= verifyTask.members.find((member) => member.memberId === ObjectToFind);
             const currentUser = verifyTask.members.find((member) => member.memberId === req.user._id);
+            if(!currentUser) throw Error ('You are not a member or an admin');
 
             // Authorizing admins to perform this operation
             if(currentUser.role !=='admin') 
@@ -322,13 +322,13 @@ exports.addDepartmentMember = async (req, res)=>{
             // verifying params values
             const verifyUser = await userModel.findById(userId);
             if(!verifyUser) throw Error ('User not found!');
-            const verifyTask = await DepartmentModel.findById(taskId);
+            const verifyTask = await departmentModel.findById(taskId);
             if(!verifyTask) throw Error ('Task not found');
 
             const ObjectToFind = userId;
             const isObjectPresent= verifyTask.members.find((member) => member.memberId === ObjectToFind);
             const currentUser = verifyTask.members.find((member) => member.memberId === req.user._id);
-
+            if(!currentUser) throw Error ('You are nnot a member of this group or an admin')
             // Authorizing admins to perform this operation
             if(currentUser.role !=='admin') 
                 return res.status(HTTP_STATUS.StatusCodes.UNAUTHORIZED).json({
@@ -380,7 +380,8 @@ exports.removeTeamMember = async (req, res) =>{
             const isObjectPresent = verifyTask.members.find((member) => member.memberId === memberId);
             if(!isObjectPresent) throw Error (`${verifyMember.email}, is not a member`);
             const currentUser = verifyTask.members.find((member) => member.memberId === req.user._id);
-            console.log(currentUser)
+            if(!currentUser) throw Error ('You are not a member or an admin');
+
             if(currentUser.role !== 'admin') throw Error('You are not authorize!')
 
             await verifyTask.updateOne({$pull : {members : {memberId : memberId }}});
@@ -423,7 +424,7 @@ exports.removeDepartmentMember = async (req, res) =>{
             const isObjectPresent = verifyTask.members.find((member) => member.memberId === memberId);
             if(!isObjectPresent) throw Error (`User is not a member`);
             const currentUser = verifyTask.members.find((member) => member.memberId === req.user._id);
-            if(!currentUser) throw Error ('You are not a member');
+            if(!currentUser) throw Error ('You are not a member or an admin');
 
             if(currentUser.role !== 'admin') throw Error('You are not authorize!');
 
@@ -449,3 +450,18 @@ exports.removeDepartmentMember = async (req, res) =>{
         }
     }
 }
+
+// Deleting a task
+
+exports.deleteIndividualTask = async (req, res)=>{
+    try{
+
+    }catch(error){
+        if(error instanceof Error){
+            res.status(500).json({
+                success: false,
+                msg: `${error.message}`
+            });
+        }
+    }
+} 
