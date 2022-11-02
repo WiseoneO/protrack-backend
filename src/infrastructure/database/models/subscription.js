@@ -22,7 +22,13 @@ const subscriptionSchema = new mongoose.Schema(
     plan: {
       type: String,
       required: true,
-      enum: ['individual', 'team', 'organization'],
+      enum: ['one', 'six'],
+    },
+    taskType: {
+      type: String,
+      required: true,
+      enum: ['Individual', 'Team', 'Oganization'],
+      default : 'Individual'
     },
     payment_status: {
       type: String,

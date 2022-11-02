@@ -1,27 +1,35 @@
 const router = require("express").Router();
 const {
-    CreateIndividualTask,
+    createIndividualTask,
     createTeamTask,
     departmentTask,
     addTeamMember,
     addDepartmentMember,
     removeTeamMember,
-    // removeDepartmentMember,
+    removeDepartmentMember,
     updateIndividualTask,
     updateTeamTask,
     updatedepartmentTask,
-    removeDepartmentMember,
     deleteIndividualTask,
     deleteTeamTask,
     deleteDepartmentTask,
     allUserTasks,
-    singleUserTasks} = require("../controllers/taskController");
+    singleUserTasks,
+    allTeamTask,
+    specificTeamTask,
+    allDepartmentTask,
+    specificDepartmentTask} = require("../controllers/taskController");
+    const checkPremium = require('../utils/checkPremium');
 
 const verifyToken= require("../middlewares/verifyUser")
 // Individual Task
 router.get("/", verifyToken,allUserTasks);
 router.get("/:taskId/single-task", verifyToken,singleUserTasks);
-router.post("/create-task", verifyToken, CreateIndividualTask);
+router.get("/teamTasks", verifyToken,checkPremium, allTeamTask);
+router.get("/:taskId/teamTask", verifyToken,specificTeamTask);
+router.get("/departmentTasks", verifyToken,allDepartmentTask);
+router.get("/:taskId/departmentTask", verifyToken,specificDepartmentTask);
+router.post("/create-task", verifyToken, createIndividualTask);
 router.post("/create-teamTask", verifyToken, createTeamTask);
 router.post("/create-departmentTask", verifyToken, departmentTask);
 router.post("/:taskId/create-team/:id", verifyToken,addTeamMember);
