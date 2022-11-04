@@ -35,7 +35,15 @@ const Joi = require('joi');
         return schema.validate(user);
       };
 
-
+      exports.subscriptionValidation = (payload) => {
+        const schema = Joi.object({
+          description: Joi.string().required(),
+          plan: Joi.string().required(),
+          payment_status: Joi.string().required(),
+          amount: Joi.string().required(),
+        }).unknown();
+        return schema.validate(payload);
+      };
 
 
  

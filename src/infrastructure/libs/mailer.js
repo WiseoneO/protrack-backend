@@ -34,9 +34,9 @@ exports.sendWelcomeMail = async (email, full_name, link)=>{
 
   transporter.sendMail(options, (err, info)=> {
     if(err){
-      console.log(err);
+      logger.info(err);
     }else{
-      console.log(info)
+      logger.info(info)
     }
   })
 }
@@ -63,9 +63,41 @@ exports.passwordReset = async (email, full_name, link)=>{
 
   transporter.sendMail(options, (err, info)=> {
     if(err){
-      console.log(err.message);
+      logger.info(err.message);
     }else{
-      console.log(info)
+      logger.info(info)
+    }
+  })
+}
+exports.sendNewSubscriptionMail = async (email, full_name, plan, expiresIn, invoiceNumber)=>{
+  let options = {
+    from :'"Protrack" <protrack@example.com>', // sender address
+    to : `${email}`,
+    subject: 'Welcome to Protrack Premium Membership', // Subject line
+    body : `
+    Hi ${full_name},
+    
+    You have successfully subscribed for our ${plan} months plan,
+    your subcription expires on ${expiresIn}
+    
+    Invoice Number: ${invoiceNumber}
+    
+    Regards:
+    Nerdyeye
+    `, // plain text body
+
+      // html: `
+      //       ${mail}
+      // `,
+  }
+
+  logger.info('Email has been sent')
+
+  transporter.sendMail(options, (err, info)=> {
+    if(err){
+      logger.info(err.message);
+    }else{
+      logger.info(info)
     }
   })
 }

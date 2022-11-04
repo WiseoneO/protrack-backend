@@ -61,21 +61,6 @@ const UserSchema = new mongoose.Schema({
         type: String,
         enum: ['free', 'paid'],
       },
-    tasks:{
-        individual : {
-            type: String,
-            ref: 'Individual',
-        },
-        team : {
-            type: String,
-            ref: 'TeamTask',
-        },
-        department : {
-            type: String,
-            ref: 'Department',
-        }
-        
-    },
 
 }, {timestamps: true}
 );
