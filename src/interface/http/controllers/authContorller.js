@@ -113,7 +113,7 @@ exports.sendPasswordLink = async (req, res)=>{
         const token = jwt.sign(payload, secret, {expiresIn: "10m"});
 
         // creating a reset link
-        const link = `http://localhost:3000/protrack.com/api/v1/auth/user/reset/${user._id}/${token}`;
+        const link = `http://localhost:3000/api/v1/auth/user/reset/${user._id}/${token}`;
 
         // send mail
             await passwordReset(user.email, user.full_name, link );

@@ -6,8 +6,9 @@ const logger = require("pino")();
 const createError = require("http-errors");
 const connectDB = require("./src/infrastructure/database/mongoose");
 const authRoute = require("./src/interface/http/routes/authRoute");
-const userRoute = require("./src/interface/http/routes/userRoute");
+const userRoute = require("./src/interface/http/routes/userRoute"); 
 const taskRoute = require("./src/interface/http/routes/taskRoute");
+const subRoute = require("./src/interface/http/routes/subRoute");
 const cors = require('cors')
 
 const app = express();
@@ -35,6 +36,7 @@ app.get("/api/v1/", (req, res, next)=>{
  })
 app.use("/api/v1/auth/", authRoute);
 app.use("/api/v1/user/", userRoute);
+app.use("/api/v1/user/subscription", subRoute);
 app.use("/api/v1/user/task", taskRoute);
 
 // Not found route

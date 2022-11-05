@@ -4,20 +4,14 @@ const departmentModel = require("../../../infrastructure/database/models/departm
 const userModel = require("../../../infrastructure/database/models/user");
 const {createTaskSchema,edit} = require("../validations/taskValidation");
 const HTTP_STATUS = require('http-status-codes');
-const { findOne, findById } = require("../../../infrastructure/database/models/teamTask");
-const { verify } = require("jsonwebtoken");
-const {
-    superAdminPermissions,
-    adminPermissions,
-    taskAdminPermissions,
-    moderatorPermissions
-}= require("../utils/permissions")
+
+
+
 // Create Task
-exports.CreateIndividualTask = async (req, res) => {
+exports.createIndividualTask = async (req, res) => {
     try {
         const {title,description,department,status,time_frame,start_date} = req.body;
         const created_By = req.user._id;
-
         // Joi Task Schema Validation 
         const {error} = createTaskSchema(req.body);
         if (error) {
@@ -26,6 +20,7 @@ exports.CreateIndividualTask = async (req, res) => {
                 message: error.details[0].message
             });
         }
+        try{
             const individualTask = await individualModel.create({
                 title,
                 description,
@@ -40,6 +35,9 @@ exports.CreateIndividualTask = async (req, res) => {
                 msg: `Task created successfully.`,
                 data: individualTask,
             });
+        }catch(error){
+            throw error;
+        }
     } catch (error) {
         if (error instanceof Error) {
             res.status(500).json({
@@ -199,8 +197,7 @@ exports.updateTeamTask = async(req, res) =>{
         }
     }catch(error){
         if(error instanceof Error){
-            res
-                .status(500)
+            res.status(500)
                 .json({
                     success: false,
                     msg: `${error}`
@@ -291,7 +288,7 @@ exports.addTeamMember = async (req, res, next)=>{
                     res.status(HTTP_STATUS.StatusCodes.OK).json({
                         success : true,
                         msg: 'New user added',
-                        data : verifyTask.members
+                        data : verifyTask
                     });
             }else if(verifyTask.members.length >= 7){
                     throw Error ('Team limit reached');
@@ -340,7 +337,7 @@ exports.addDepartmentMember = async (req, res)=>{
                     res.status(HTTP_STATUS.StatusCodes.OK).json({
                         success : true,
                         msg: 'New user added',
-                        data : verifyTask.members
+                        data : verifyTask
                     });
             }else if(verifyTask.members.length >= 15){
                     throw Error ('Team limit reached');
@@ -452,10 +449,27 @@ exports.removeDepartmentMember = async (req, res) =>{
 }
 
 // Deleting a task
-
 exports.deleteIndividualTask = async (req, res)=>{
     try{
-
+        const taskId = req.params.taskId;
+        // console.log(taskId)
+        try{
+            const verifyTask = await individualModel.findByIdAndRemove({
+                _id : taskId,
+                created_By : req.user._id
+            });
+            if(!verifyTask){ 
+                throw Error ('Task not found!')
+            }else if(verifyTask.created_By !== req.user._id){
+                throw Error( 'Access denied!')
+            }
+            res.status(200).json({
+                success : true,
+                msg : 'Task deleted successfully'
+            })
+        }catch(error){
+            throw error
+        }
     }catch(error){
         if(error instanceof Error){
             res.status(500).json({
@@ -465,3 +479,217 @@ exports.deleteIndividualTask = async (req, res)=>{
         }
     }
 } 
+// Deleting a team task
+exports.deleteTeamTask = async (req, res)=>{
+    try{
+        const taskId = req.params.taskId;
+        // console.log(taskId)
+        try{
+            const verifyTask = await teamModel.findByIdAndRemove({
+                _id : taskId,
+                created_By : req.user._id
+            });
+            if(!verifyTask){ 
+                throw Error ('Task not found!')
+            }else if(verifyTask.created_By !== req.user._id){
+                throw Error( 'Access denied!')
+            }
+            res.status(200).json({
+                success : true,
+                msg : 'Task deleted successfully'
+            })
+        }catch(error){
+            throw error
+        }
+    }catch(error){
+        if(error instanceof Error){
+            res.status(500).json({
+                success: false,
+                msg: `${error.message}`
+            });
+        }
+    }
+} 
+// Deleting a task
+exports.deleteDepartmentTask = async (req, res)=>{
+    try{
+        const taskId = req.params.taskId;
+        // console.log(taskId)
+        try{
+            const verifyTask = await departmentModel.findByIdAndRemove({
+                _id : taskId,
+                created_By : req.user._id
+            });
+            if(!verifyTask){ 
+                throw Error ('Task not found!')
+            }else if(verifyTask.created_By !== req.user._id){
+                throw Error( 'Access denied!')
+            }
+            res.status(200).json({
+                success : true,
+                msg : 'Task deleted successfully'
+            })
+        }catch(error){
+            throw error
+        }
+    }catch(error){
+        if(error instanceof Error){
+            res.status(500).json({
+                success: false,
+                msg: `${error.message}`
+            });
+        }
+    }
+} 
+
+// Fetch User Tasks
+exports.allUserTasks = async (req, res)=>{
+    try{
+        const query = {created_By: req.user._id}
+        const tasks = await individualModel.find(query).sort({createdAt:1});
+        if(!tasks || tasks.length === 0) res
+            .status(HTTP_STATUS.StatusCodes.OK)
+            .json({success: true, msg : 'No task found!'})
+
+            res.status(HTTP_STATUS.StatusCodes.OK).json({
+                success : 'true',
+                taskTotal : tasks.length,
+                msg : 'Data retrieved successfully',
+                data : tasks
+            })
+
+    }catch(error){
+        if(error instanceof Error){
+            res.status(500).json({
+                success: false,
+                msg: `${error.message}`
+            });
+        }
+    }
+}
+// Fetch specific User Tasks
+exports.singleUserTasks = async (req, res)=>{
+    const taskId = req.params.taskId;
+    const query = {_id : taskId}
+    try{
+        const verifyTask = await individualModel.findById(query)
+        if(verifyTask.created_By !== req.user._id) throw Error('No task found');
+
+        if(verifyTask.length === 0) res
+            .status(HTTP_STATUS.StatusCodes.OK)
+            .json({success: true, msg : 'No task found!'})
+
+            res.status(HTTP_STATUS.StatusCodes.OK).json({
+                success : 'true',
+                msg : 'Data retrieved successfully',
+                data : verifyTask
+            })
+
+    }catch(error){
+        if(error instanceof Error){
+            res.status(500).json({
+                success: false,
+                msg: `${error.message}`
+            });
+        }
+    }
+}
+
+// Fetch Team Task
+exports.allTeamTask = async (req, res)=>{
+    try{
+        const query = {created_By: req.user._id}
+        const tasks = await teamModel.find(query).sort({createdAt:-1});
+        if(!tasks || tasks.length === 0) throw Error ('No task available');
+        res.status(HTTP_STATUS.StatusCodes.OK).json({
+            success : true,
+            totalNo : tasks.length,
+            msg : 'Data retrived successfully!',
+            data : tasks
+        })
+    }catch(error){
+        if(error instanceof Error){
+            res.status(500).json({
+                success: false,
+                msg: `${error.message}`
+            });
+        }
+    }
+}
+
+// Get Specific Team Task
+exports.specificTeamTask = async (req, res)=>{
+    try{
+        const taskId = req.params.taskId;
+        try{
+            const verifyTask = await teamModel.findById(taskId);
+            if(!verifyTask) throw Error ('No task found!');
+
+            const ObjectToFind = verifyTask.members.find((member) => member.memberId === req.user._id);
+            if(!ObjectToFind) throw Error ('You cant view this task');
+            res.status(HTTP_STATUS.StatusCodes.OK).json({
+                success : true,
+                msg : ' Data retrieved successfully!',
+                data :verifyTask
+            })
+        }catch(error){
+            throw error
+        }
+    }catch(error){
+        if(error instanceof Error){
+            res.status(500).json({
+                success: false,
+                msg: `${error.message}`
+            });
+        }
+    }
+}
+// Fetch Department Task
+exports.allDepartmentTask = async (req, res)=>{
+    try{
+        const query = {created_By: req.user._id}
+        const tasks = await departmentModel.find(query).sort({createdAt:-1});
+        if(!tasks || tasks.length === 0) throw Error ('No task available');
+        res.status(HTTP_STATUS.StatusCodes.OK).json({
+            success : true,
+            totalNo : tasks.length,
+            msg : 'Data retrived successfully!',
+            data : tasks
+        })
+    }catch(error){
+        if(error instanceof Error){
+            res.status(500).json({
+                success: false,
+                msg: `${error.message}`
+            });
+        }
+    }
+}
+
+// Get Specific Department Task
+exports.specificDepartmentTask = async (req, res)=>{
+    try{
+        const taskId = req.params.taskId;
+        try{
+            const verifyTask = await departmentModel.findById(taskId);
+            if(!verifyTask) throw Error ('No task found!');
+
+            const ObjectToFind = verifyTask.members.find((member) => member.memberId === req.user._id);
+            if(!ObjectToFind) throw Error ('You cant view this task');
+            res.status(HTTP_STATUS.StatusCodes.OK).json({
+                success : true,
+                msg : ' Data retrieved successfully!',
+                data :verifyTask
+            })
+        }catch(error){
+            throw error
+        }
+    }catch(error){
+        if(error instanceof Error){
+            res.status(500).json({
+                success: false,
+                msg: `${error.message}`
+            });
+        }
+    }
+}

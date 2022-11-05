@@ -106,17 +106,46 @@ exports.changePassword = async (req, res)=>{
 
     }catch(error){
         if (error instanceof Error) {
-            res
-              .status(500)
+            res.status(500)
               .json({ success: false, msg: `${error}` });
           }
         }
 }
 
-// update user Profile
-exports.update = async (req, res) =>{
+// UPDATE USER PROFILE
+// exports.update = async (req, res) =>{
+//     try{
+//         const userId = req.params.userId;
+//         const payload = req.body;
+//         const query= {_id : userId}
+//         try{
+//             const {error} = createUserSchema(payload);
+//                 if(error){
+//                     return res.status(400).json({
+//                         success : false,
+//                         message : error.details[0].message
+//                     });
+//                 }
+//             const verifyUser = await userModel.findByIdAndUpdate(query,payload,{new : true});
+//             if(!verifyUser) throw Error ('You cant perform this operation');
 
-}
+//             res.status(HTTP_STATUS.StatusCodes.ACCEPTED).json({
+//                 success : true,
+//                 msg : 'User data updated successfully',
+//                 data : verifyUser
+//             });
+            
+
+
+//         }catch(error){
+//             throw error;
+//         }
+//     }catch(error){
+//         if(error instanceof Error){
+            
+//         }
+//     }
+// }
 
 // soft delete User
 exports.softDelete = async (req, res) =>{

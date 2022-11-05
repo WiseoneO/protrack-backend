@@ -9,7 +9,7 @@ const subscriptionSchema = new mongoose.Schema(
     },
     invoiceNumber: {
       type: String,
-      required: true,
+      // required: true,
     },
     description: {
       type: String,
@@ -22,7 +22,14 @@ const subscriptionSchema = new mongoose.Schema(
     plan: {
       type: String,
       required: true,
-      enum: ['individual', 'team', 'organization'],
+      enum: ['one', 'six'],
+      default : 'one'
+    },
+    taskType: {
+      type: String,
+      required: true,
+      enum: ['Individual', 'Team', 'Oganization'],
+      default : 'Individual'
     },
     payment_status: {
       type: String,

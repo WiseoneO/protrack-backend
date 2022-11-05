@@ -6,7 +6,7 @@ const memberSchema = new mongoose.Schema({
     },
     role : {
         type : String,
-        enums : ["admin", "moderator","member"],
+        enums : ["admin","member"],
         default : 'member',
     },
 })
