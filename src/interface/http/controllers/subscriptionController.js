@@ -40,6 +40,7 @@ exports.activateSub = async (req, res)=>{
                 ...req.body,
                 userId : req.user._id,
                 invoiceNumber : invoiceNumber,
+                taskType : taskType,
                 start_date : startDate,
                 end_date : endDate
             }
@@ -78,7 +79,7 @@ exports.activateSub = async (req, res)=>{
             res.status(HTTP_STATUS.StatusCodes.CREATED).json({
                 success: true,
                 msg: `user successfully subscribed`,
-                data: user,
+                data: newSub,
             });
         }else if(taskType === 'Organization'){
             if(req.body.payment_status !== 'paid') throw Error (`Value of payment statue must be paid`);
@@ -137,6 +138,8 @@ exports.activateSub = async (req, res)=>{
                 msg: `user successfully subscribed`,
                 data: user,
             });
+        }else{
+            throw Error ('Select a plan')
         }
         
     }catch(error){
@@ -145,6 +148,25 @@ exports.activateSub = async (req, res)=>{
                 success: false,
                 msg: `${error}`
             });
+        }
+    }
+}
+
+exports.getUserSubscriptions = async (req, res) =>{
+    try{
+        const userId = req.params.id;
+        const user_subscription = await SubscriptionModel.find({userId}).sort({createdAt : -1});
+        if(!user_subscription) throw Error ('Subscription not found');
+        res.status(HTTP_STATUS.StatusCodes.ACCEPTED).json({
+            success : true,
+            msg : user_subscription
+        })
+    }catch(error){
+        if(error instanceof Error){
+            res.status(500).json({
+                success : false,
+                msg :`${error.message}`
+            })
         }
     }
 }

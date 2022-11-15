@@ -18,10 +18,7 @@ const teamSchema = new mongoose.Schema({
     },
     
     members : [memberSchema],
-    // members : {
-    //     type : Array,
-    //     default: []
-    // },
+
     title : {
         type: String
     },

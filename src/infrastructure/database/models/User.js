@@ -36,11 +36,7 @@ const UserSchema = new mongoose.Schema({
                 'Banking',
                 'Education/Training',
                 'Others'
-                ]
-    },
-    team: {
-        type  : Array,
-        default : [], 
+            ]
     },
     job_title : {
         type : String,

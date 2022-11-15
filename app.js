@@ -1,8 +1,9 @@
 const express = require("express");
+const app = express()
 // const morgan = require("morgan");
 const config = require("./src/config/defaults")
 const helmet = require("helmet");
-const logger = require("pino")();
+// const logger = require("pino")();
 const createError = require("http-errors");
 const connectDB = require("./src/infrastructure/database/mongoose");
 const authRoute = require("./src/interface/http/routes/authRoute");
@@ -11,29 +12,23 @@ const taskRoute = require("./src/interface/http/routes/taskRoute");
 const subRoute = require("./src/interface/http/routes/subRoute");
 const cors = require('cors')
 
-const app = express();
-connectDB();
-
-// console.log(express)
+connectDB(app);
 app.use(express.json())
-
 app.use(cors());
-// log routes visited
-// app.use(morgan("common"));
 
 // helps secure our express app by setting various HTTP head099Mers
 app.use(helmet());
 
-
-// Firing the routes
-
+// BASE ROUTE
 app.get("/api/v1/", (req, res, next)=>{
     res.status(200).json({
      message : "API v1 is running",
      env: config.env,
      projectName: config.projectName
     })
- })
+ });
+
+//  Application routes
 app.use("/api/v1/auth/", authRoute);
 app.use("/api/v1/user/", userRoute);
 app.use("/api/v1/user/subscription", subRoute);
@@ -53,7 +48,3 @@ app.use(async (error, req, res, next) => {
         }
     });
 });
-
-app.listen(config.port, ()=>{
-    logger.info(`Server started on port ${config.port}`)
-})

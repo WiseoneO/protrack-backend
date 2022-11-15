@@ -28,7 +28,7 @@ const checkOrganizationSub = async (req, res, next)=>{
     await Subscription.findOne({
         userId,
         end_date : {$gt: new Date(today)},
-        taskType : "Oganization"
+        taskType : "Organization"
         
     })
     .then((isSubscribed)=>{

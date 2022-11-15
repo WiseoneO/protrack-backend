@@ -28,7 +28,7 @@ const subscriptionSchema = new mongoose.Schema(
     taskType: {
       type: String,
       required: true,
-      enum: ['Individual', 'Team', 'Oganization'],
+      enum: ['Individual', 'Team', 'Organization'],
       default : 'Individual'
     },
     payment_status: {
