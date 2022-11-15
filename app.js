@@ -26,7 +26,7 @@ app.get("/api/v1/", (req, res, next)=>{
      env: config.env,
      projectName: config.projectName
     })
- });
+});
 
 //  Application routes
 app.use("/api/v1/auth/", authRoute);
