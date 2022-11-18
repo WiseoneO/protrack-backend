@@ -1,6 +1,7 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
+const {Schema, model} = mongoose;
 
-const subscriptionSchema = new mongoose.Schema(
+const subscriptionSchema = new Schema(
   {
     userId: {
       type: String,
@@ -50,6 +51,6 @@ const subscriptionSchema = new mongoose.Schema(
   }
 );
 
-const SubscriptionModel = mongoose.model('Subscription', subscriptionSchema);
+export default model('SubscriptionModel', subscriptionSchema);
 
-module.exports = SubscriptionModel;
+

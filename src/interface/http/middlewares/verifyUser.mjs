@@ -1,6 +1,7 @@
-const jwt = require("jsonwebtoken");
-const config = require("../../../config/defaults")
-
+import jsonwebtoken from "jsonwebtoken";
+const { verify } = jsonwebtoken;
+import config from "../../../config/defaults.mjs";
+const { userSecret } = config
 // verify the token
 const verifyToken = async (req, res, next)=>{
     const authHeader = req.headers.authorization;
@@ -14,7 +15,7 @@ const verifyToken = async (req, res, next)=>{
     const token = authHeader.split(" ")[1];
 
     try{
-        const verified =  jwt.verify(token, config.userSecret)
+        const verified =  verify(token, userSecret)
             req.user = verified;
             next();
 
@@ -49,4 +50,4 @@ const verifyToken = async (req, res, next)=>{
 //     })
 // }
 
-module.exports = verifyToken;
+export default verifyToken;

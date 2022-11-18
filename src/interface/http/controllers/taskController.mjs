@@ -1,22 +1,22 @@
-const teamModel = require("../../../infrastructure/database/models/teamTask");
-const individualModel = require("../../../infrastructure/database/models/individualtask");
-const departmentModel = require("../../../infrastructure/database/models/departmentTask");
-const userModel = require("../../../infrastructure/database/models/user");
-const {createTaskSchema,edit} = require("../validations/taskValidation");
-const HTTP_STATUS = require('http-status-codes');
-const moment = require('moment');
+import teamModel from "../../../infrastructure/database/models/teamTask.mjs";
+import individualModel from "../../../infrastructure/database/models/individualTask.mjs";
+import departmentModel from "../../../infrastructure/database/models/departmentTask.mjs";
+import userModel from "../../../infrastructure/database/models/User.mjs";
+import { createTaskSchema, edit } from "../validations/taskValidation.mjs";
+import { StatusCodes } from 'http-status-codes';
+import moment from 'moment';
 
 
 
 // Create Task
-exports.createIndividualTask = async (req, res) => {
+export const createIndividualTask = async (req, res)=>{
     try {
         const {title,description,department,status,time_frame,start_date} = req.body;
         const created_By = req.user._id;
         // Joi Task Schema Validation 
         const {error} = createTaskSchema(req.body);
         if (error) {
-            return res.status(HTTP_STATUS.StatusCodes.BAD_REQUEST).json({
+            return res.status(StatusCodes.BAD_REQUEST).json({
                 success: false,
                 message: error.details[0].message
             });
@@ -51,14 +51,14 @@ exports.createIndividualTask = async (req, res) => {
 }
 
 // Create team task
-exports.createTeamTask = async (req, res)=>{
+export const createTeamTask = async(req, res)=>{
     const {title,description,department,status,time_frame,start_date} = req.body;
 
     try{
         // Joi Task Schema Validation 
         const {error} = createTaskSchema(req.body);
         if (error) {
-            return res.status(HTTP_STATUS.StatusCodes.BAD_REQUEST).json({
+            return res.status(StatusCodes.BAD_REQUEST).json({
                 success: false,
                 message: error.details[0].message
             });
@@ -91,7 +91,7 @@ exports.createTeamTask = async (req, res)=>{
 }
 
 // Create department Task
-exports.departmentTask = async(req, res)=>{
+export const departmentTask = async (req, res)=>{
     const {title,description,department,status,time_frame,start_date} = req.body;
 
     try{
@@ -124,7 +124,7 @@ exports.departmentTask = async(req, res)=>{
 }
 
 // Update individual Task status
-exports.updateIndividualTask = async(req, res) =>{
+export const updateIndividualTask = async (req, res)=>{
     try{
         const creatorId = req.user._id;
         const individualTaskId = req.params.id;
@@ -163,14 +163,14 @@ exports.updateIndividualTask = async(req, res) =>{
 }
 
 // Update team Task status
-exports.updateTeamTask = async(req, res) =>{
+export const updateTeamTask = async (req, res)=>{
     try{
         const teamTaskId = req.params.id;
         const payload = req.body;
         // Joi Task Schema Validation 
         const {error} = createTaskSchema(payload);
         if (error) {
-            return res.status(HTTP_STATUS.StatusCodes.BAD_REQUEST).json({
+            return res.status(StatusCodes.BAD_REQUEST).json({
                 success: false,
                 message: error.details[0].message
             });
@@ -189,7 +189,7 @@ exports.updateTeamTask = async(req, res) =>{
 
             const updatedTask = await teamModel.findOneAndUpdate({_id : teamTaskId},payload,{new: true});
 
-            res.status(HTTP_STATUS.StatusCodes.ACCEPTED).json({
+            res.status(StatusCodes.ACCEPTED).json({
                 success : true,
                 msg : 'Task updated successfully',
                 data : updatedTask
@@ -209,7 +209,7 @@ exports.updateTeamTask = async(req, res) =>{
     }
 }
 // Update department Task status
-exports.updatedepartmentTask = async(req, res) =>{
+export const updatedepartmentTask = async (req, res)=>{
     try{
         const teamTaskId = req.params.id;
         const payload = req.body;
@@ -217,7 +217,7 @@ exports.updatedepartmentTask = async(req, res) =>{
         // Joi Task Schema Validation 
         const {error} = createTaskSchema(payload);
         if (error) {
-            return res.status(HTTP_STATUS.StatusCodes.BAD_REQUEST).json({
+            return res.status(StatusCodes.BAD_REQUEST).json({
                 success: false,
                 message: error.details[0].message
             });
@@ -237,7 +237,7 @@ exports.updatedepartmentTask = async(req, res) =>{
 
             const updatedTask = await departmentModel.findOneAndUpdate({_id : teamTaskId},payload,{new: true});
 
-            res.status(HTTP_STATUS.StatusCodes.ACCEPTED).json({
+            res.status(StatusCodes.ACCEPTED).json({
                 success : true,
                 msg : 'Task updated successfully',
                 data : updatedTask
@@ -264,7 +264,7 @@ exports.updatedepartmentTask = async(req, res) =>{
 }
 
 // Add TeamMembers
-exports.addTeamMember = async (req, res, next)=>{
+export const addTeamMember = async(req, res, next)=>{
     try{
         const userId = req.params.id;
         const taskId = req.params.taskId;
@@ -282,13 +282,13 @@ exports.addTeamMember = async (req, res, next)=>{
 
             // Authorizing admins to perform this operation
             if(currentUser.role !=='admin') 
-                return res.status(HTTP_STATUS.StatusCodes.UNAUTHORIZED).json({
+                return res.status(StatusCodes.UNAUTHORIZED).json({
                     success : false,
                     msg : 'You are not authorized!'
                 });
             if(!isObjectPresent && verifyTask.members.length < 7){
                 await verifyTask.updateOne({$push : {members : {memberId: userId, role : 'member'}}});
-                    res.status(HTTP_STATUS.StatusCodes.OK).json({
+                    res.status(StatusCodes.OK).json({
                         success : true,
                         msg: 'New user added',
                         data : verifyTask
@@ -296,7 +296,7 @@ exports.addTeamMember = async (req, res, next)=>{
             }else if(verifyTask.members.length >= 7){
                     throw Error ('Team limit reached');
                 }else{
-                    res.status(HTTP_STATUS.StatusCodes.OK).json({
+                    res.status(StatusCodes.OK).json({
                         success : true,
                         msg : `${verifyUser.email} is already a member`
                     });
@@ -314,7 +314,7 @@ exports.addTeamMember = async (req, res, next)=>{
     }
 }
 // Add department Members
-exports.addDepartmentMember = async (req, res)=>{
+export const addDepartmentMember = async (req, res)=>{
     try{
         const userId = req.params.id;
         const taskId = req.params.taskId;
@@ -331,13 +331,13 @@ exports.addDepartmentMember = async (req, res)=>{
             if(!currentUser) throw Error ('You are nnot a member of this group or an admin')
             // Authorizing admins to perform this operation
             if(currentUser.role !=='admin') 
-                return res.status(HTTP_STATUS.StatusCodes.UNAUTHORIZED).json({
+                return res.status(StatusCodes.UNAUTHORIZED).json({
                     success : false,
                     msg : 'You are not authorized!'
                 });
             if(!isObjectPresent && verifyTask.members.length < 15){
                 await verifyTask.updateOne({$push : {members : {memberId: userId, role : 'member'}}});
-                    res.status(HTTP_STATUS.StatusCodes.OK).json({
+                    res.status(StatusCodes.OK).json({
                         success : true,
                         msg: 'New user added',
                         data : verifyTask
@@ -345,7 +345,7 @@ exports.addDepartmentMember = async (req, res)=>{
             }else if(verifyTask.members.length >= 15){
                     throw Error ('Team limit reached');
                 }else{
-                    res.status(HTTP_STATUS.StatusCodes.OK).json({
+                    res.status(StatusCodes.OK).json({
                         success : true,
                         msg : `${verifyUser.email} is already a member`
                     });
@@ -364,7 +364,7 @@ exports.addDepartmentMember = async (req, res)=>{
 }
 
 // Remove a Team Member
-exports.removeTeamMember = async (req, res) =>{
+export const removeTeamMember = async(req, res)=>{
     try{
         const memberId = req.params.id;
         const taskId = req.params.taskId;
@@ -386,7 +386,7 @@ exports.removeTeamMember = async (req, res) =>{
 
             await verifyTask.updateOne({$pull : {members : {memberId : memberId }}});
 
-            res.status(HTTP_STATUS.StatusCodes.OK).json({
+            res.status(StatusCodes.OK).json({
                 success : true,
                 totalNo : verifyTask.members.length,
                 msg : 'User removed successfully',
@@ -408,7 +408,7 @@ exports.removeTeamMember = async (req, res) =>{
 }
 
 // Remove a Department Member
-exports.removeDepartmentMember = async (req, res) =>{
+export const removeDepartmentMember = async (req, res)=>{
     try{
         const memberId = req.params.id;
         const taskId = req.params.taskId;
@@ -430,7 +430,7 @@ exports.removeDepartmentMember = async (req, res) =>{
 
             await verifyTask.updateOne({$pull : {members : {memberId : memberId }}});
 
-            res.status(HTTP_STATUS.StatusCodes.OK).json({
+            res.status(StatusCodes.OK).json({
                 success : true,
                 totalNo : verifyTask.members.length,
                 msg : 'User removed successfully',
@@ -452,7 +452,7 @@ exports.removeDepartmentMember = async (req, res) =>{
 }
 
 // Deleting a task
-exports.deleteIndividualTask = async (req, res)=>{
+export const deleteIndividualTask = async (req, res)=>{
     try{
         const taskId = req.params.taskId;
         // console.log(taskId)
@@ -483,7 +483,7 @@ exports.deleteIndividualTask = async (req, res)=>{
     }
 } 
 // Deleting a team task
-exports.deleteTeamTask = async (req, res)=>{
+export const deleteTeamTask = async (req, res)=>{
     try{
         const taskId = req.params.taskId;
         // console.log(taskId)
@@ -514,7 +514,7 @@ exports.deleteTeamTask = async (req, res)=>{
     }
 } 
 // Deleting a task
-exports.deleteDepartmentTask = async (req, res)=>{
+export const deleteDepartmentTask = async (req, res)=>{
     try{
         const taskId = req.params.taskId;
         // console.log(taskId)
@@ -546,15 +546,15 @@ exports.deleteDepartmentTask = async (req, res)=>{
 } 
 
 // Fetch User Tasks
-exports.allUserTasks = async (req, res)=>{
+export const allUserTasks = async (req, res)=>{
     try{
         const query = {created_By: req.user._id}
         const tasks = await individualModel.find(query).sort({createdAt:1});
         if(!tasks || tasks.length === 0) res
-            .status(HTTP_STATUS.StatusCodes.OK)
+            .status(StatusCodes.OK)
             .json({success: true, msg : 'No task found!'})
 
-            res.status(HTTP_STATUS.StatusCodes.OK).json({
+            res.status(StatusCodes.OK).json({
                 success : 'true',
                 taskTotal : tasks.length,
                 msg : 'Data retrieved successfully',
@@ -570,7 +570,7 @@ exports.allUserTasks = async (req, res)=>{
     }
 }
 // Fetch specific User Tasks
-exports.singleUserTasks = async (req, res)=>{
+export const singleUserTasks = async (req, res)=>{
     const taskId = req.params.taskId;
     const query = {_id : taskId}
     try{
@@ -578,10 +578,10 @@ exports.singleUserTasks = async (req, res)=>{
         if(verifyTask.created_By !== req.user._id) throw Error('No task found');
 
         if(verifyTask.length === 0) res
-            .status(HTTP_STATUS.StatusCodes.OK)
+            .status(StatusCodes.OK)
             .json({success: true, msg : 'No task found!'})
 
-            res.status(HTTP_STATUS.StatusCodes.OK).json({
+            res.status(StatusCodes.OK).json({
                 success : 'true',
                 msg : 'Data retrieved successfully',
                 data : verifyTask
@@ -598,12 +598,12 @@ exports.singleUserTasks = async (req, res)=>{
 }
 
 // Fetch Team Task
-exports.allTeamTask = async (req, res)=>{
+export const allTeamTask = async (req, res)=>{
     try{
         const query = {created_By: req.user._id}
         const tasks = await teamModel.find(query).sort({createdAt:-1});
         if(!tasks || tasks.length === 0) throw Error ('No task available');
-        res.status(HTTP_STATUS.StatusCodes.OK).json({
+        res.status(StatusCodes.OK).json({
             success : true,
             totalNo : tasks.length,
             msg : 'Data retrived successfully!',
@@ -620,7 +620,7 @@ exports.allTeamTask = async (req, res)=>{
 }
 
 // Get Specific Team Task
-exports.specificTeamTask = async (req, res)=>{
+export const specificTeamTask = async (req, res)=>{
     try{
         const taskId = req.params.taskId;
         try{
@@ -629,7 +629,7 @@ exports.specificTeamTask = async (req, res)=>{
 
             const ObjectToFind = verifyTask.members.find((member) => member.memberId === req.user._id);
             if(!ObjectToFind) throw Error ('You cant view this task');
-            res.status(HTTP_STATUS.StatusCodes.OK).json({
+            res.status(StatusCodes.OK).json({
                 success : true,
                 msg : ' Data retrieved successfully!',
                 data :verifyTask
@@ -647,12 +647,12 @@ exports.specificTeamTask = async (req, res)=>{
     }
 }
 // Fetch Department Task
-exports.allDepartmentTask = async (req, res)=>{
+export const allDepartmentTask = async (req, res)=>{
     try{
         const query = {created_By: req.user._id}
         const tasks = await departmentModel.find(query).sort({createdAt:-1});
         if(!tasks || tasks.length === 0) throw Error ('No task available');
-        res.status(HTTP_STATUS.StatusCodes.OK).json({
+        res.status(StatusCodes.OK).json({
             success : true,
             totalNo : tasks.length,
             msg : 'Data retrived successfully!',
@@ -669,7 +669,7 @@ exports.allDepartmentTask = async (req, res)=>{
 }
 
 // Get Specific Department Task
-exports.specificDepartmentTask = async (req, res)=>{
+export const specificDepartmentTask = async (req, res)=>{
     try{
         const taskId = req.params.taskId;
         try{
@@ -678,7 +678,7 @@ exports.specificDepartmentTask = async (req, res)=>{
 
             const ObjectToFind = verifyTask.members.find((member) => member.memberId === req.user._id);
             if(!ObjectToFind) throw Error ('You cant view this task');
-            res.status(HTTP_STATUS.StatusCodes.OK).json({
+            res.status(StatusCodes.OK).json({
                 success : true,
                 msg : ' Data retrieved successfully!',
                 data :verifyTask

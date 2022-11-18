@@ -1,12 +1,14 @@
-const userModel = require("../../../infrastructure/database/models/user");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
-const config = require("../../../config/defaults");
-const {passwordReset} = require("../../../infrastructure/libs/mailer");
-const {signInValidation,forgotPasswordValidation} = require("../validations/userValidation");
-const {generatePassword} = require("../utils/passwordGenerator");
+import userModel from "../../../infrastructure/database/models/User.mjs";
+import jsonwebtoken from "jsonwebtoken";
+const { sign, verify } = jsonwebtoken
 
-exports.login = async (req, res) =>{
+import { compare, hash } from "bcrypt";
+import config from "../../../config/defaults.mjs";
+import { passwordReset } from "../../../infrastructure/libs/mailer.mjs";
+import { signInValidation, forgotPasswordValidation } from "../validations/userValidation.mjs";
+// import { generatePassword } from "../utils/passwordGenerator";
+
+export const login = async (req, res)=>{
     try{
         const {email, password} = req.body;
         const {error} = signInValidation(req.body);
@@ -28,11 +30,11 @@ exports.login = async (req, res) =>{
         throw new Error ('Your account has been suspended.')
 
         // Verify user's password
-        const validPass = await bcrypt.compare(password, user.password);
+        const validPass = await compare(password, user.password);
         if(!validPass) throw new Error('Your email or password in incorrect');
 
         // generate jwt token
-        const token = await jwt.sign({
+        const token = sign({
             _id: user._id,
             fullName: user.full_name,
             email: user.email,
@@ -59,7 +61,7 @@ exports.login = async (req, res) =>{
     
 }
 
-exports.verifyToken = async (req, res)=>{
+export const verifyToken = async (req, res)=>{
     try{
         const userId = req.params.id;
         const token = req.params.token;
@@ -74,7 +76,7 @@ exports.verifyToken = async (req, res)=>{
         if(!user) throw new Error(`User with this Id not found`);
 
         const secret = config.userEmailSecret;
-        const payload = jwt.verify(token, `${secret}`);
+        const payload = verify(token, `${secret}`);
         if (!payload) throw new Error('Invalid Token');
 
         user.isVerified = true;
@@ -97,7 +99,7 @@ exports.verifyToken = async (req, res)=>{
 
 }
 
-exports.sendPasswordLink = async (req, res)=>{
+export const  sendPasswordLink = async (req, res)=>{
     try{
         const email = req.body;
 
@@ -110,7 +112,7 @@ exports.sendPasswordLink = async (req, res)=>{
             email : user.email,
             id: user._id,
         };
-        const token = jwt.sign(payload, secret, {expiresIn: "10m"});
+        const token = sign(payload, secret, {expiresIn: "10m"});
 
         // creating a reset link
         const link = `http://localhost:3000/api/v1/auth/user/reset/${user._id}/${token}`;
@@ -133,7 +135,7 @@ exports.sendPasswordLink = async (req, res)=>{
 
 }
 
-exports.resetUserPassword = async (req, res)=>{
+export const resetUserPassword = async (req, res)=>{
     try{
         const {newPassword, confirmPassword} = req.body;
         const userId = req.params.id;
@@ -152,14 +154,14 @@ exports.resetUserPassword = async (req, res)=>{
 
         // verifying reset token
         const secret = config.userReset + user.password;
-        const payload = jwt.verify(token, secret);
+        const payload = verify(token, secret);
         if(!payload) throw new Error(`Invalid Token`);
 
         // check if newPassword and confirmPassword match
         if(newPassword !== confirmPassword) throw new Error(`Password mismatch!`);
         
         // hashing newPassword and changing the password to the new Password
-        const hashPassword = await bcrypt.hash(newPassword, 12);
+        const hashPassword = await hash(newPassword, 12);
         user.password = hashPassword;
         await user.save();
         delete user._doc.password;

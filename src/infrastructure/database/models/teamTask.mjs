@@ -1,10 +1,25 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+const {Schema, model} = mongoose;
 
-const individualSchema = new mongoose.Schema({
+const memberSchema = new Schema({
+    memberId : {
+        type : String
+    },
+    role : {
+        type : String,
+        enums : ["admin","member"],
+        default : 'member',
+    },
+})
+
+const teamSchema = new Schema({
     created_By: {
         type: String,
         ref: 'User',
     },
+    
+    members : [memberSchema],
+
     title : {
         type: String
     },
@@ -15,17 +30,14 @@ const individualSchema = new mongoose.Schema({
         type : String,
         enum : ["Business", "Education", "IT", "Marketing", "others"],
         default : "others"
-
     },
     status : {
         type : String,
         enum : ["Pending", "In-Progress", "Completed"],
         default : "Pending"
-
     },
     time_frame : {
         type : String,
-        // required: true
     },
     start_date : {
         type : String,
@@ -38,6 +50,4 @@ const individualSchema = new mongoose.Schema({
     },
 )
 
-const IndividualTaskModel = mongoose.model("Individual", individualSchema);
-
-module.exports = IndividualTaskModel;
+export default model("TeamTaskModel", teamSchema);

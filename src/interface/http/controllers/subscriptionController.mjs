@@ -1,11 +1,11 @@
-const SubscriptionModel = require('../../../infrastructure/database/models/subscription');
-const userModel = require('../../../infrastructure/database/models/user')
-const {generatePassword} = require('../../http/utils/passwordGenerator')
-const HTTP_STATUS = require('http-status-codes');
-const {subscriptionValidation} = require("../validations/userValidation");
-const {sendNewSubscriptionMail} = require('../../../infrastructure/libs/mailer')
+import SubscriptionModel from '../../../infrastructure/database/models/subscription.mjs';
+import userModel from '../../../infrastructure/database/models/User.mjs';
+import { generatePassword } from '../utils/passwordGenerator.mjs';
+import { StatusCodes } from 'http-status-codes';
+import { subscriptionValidation } from "../validations/userValidation.mjs";
+import { sendNewSubscriptionMail } from '../../../infrastructure/libs/mailer.mjs';
 
-exports.activateSub = async (req, res)=>{
+export const activateSub = async (req, res)=>{
     const taskType = req.query.taskType;
     const {full_name, description,amount,plan,payment_status} = req.body;
     
@@ -76,7 +76,7 @@ exports.activateSub = async (req, res)=>{
             }
 
             delete user._doc.password;
-            res.status(HTTP_STATUS.StatusCodes.CREATED).json({
+            res.status(StatusCodes.CREATED).json({
                 success: true,
                 msg: `user successfully subscribed`,
                 data: newSub,
@@ -133,7 +133,7 @@ exports.activateSub = async (req, res)=>{
             }
 
             delete user._doc.password;
-            res.status(HTTP_STATUS.StatusCodes.CREATED).json({
+            res.status(StatusCodes.CREATED).json({
                 success: true,
                 msg: `user successfully subscribed`,
                 data: user,
@@ -152,12 +152,12 @@ exports.activateSub = async (req, res)=>{
     }
 }
 
-exports.getUserSubscriptions = async (req, res) =>{
+export const getUserSubscriptions = async (req, res)=>{
     try{
         const userId = req.params.id;
         const user_subscription = await SubscriptionModel.find({userId}).sort({createdAt : -1});
         if(!user_subscription) throw Error ('Subscription not found');
-        res.status(HTTP_STATUS.StatusCodes.ACCEPTED).json({
+        res.status(StatusCodes.ACCEPTED).json({
             success : true,
             msg : user_subscription
         })

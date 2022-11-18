@@ -1,9 +1,9 @@
-const multer = require("multer");
-const path = require("path");
-const storage = multer.diskStorage({
+import multer, { diskStorage } from "multer";
+import { extname } from "path";
+const storage = diskStorage({
     destination : "./uploads/avatars",
     filename : (req, file, cb)=>{
-        cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
+        cb(null, `${file.fieldname}_${Date.now()}${extname(file.originalname)}`)
     }
 });
 
@@ -23,4 +23,4 @@ const upload = multer({
     fileFilter : fileFilter
 })
 
-module.exports = upload;
+export default upload;

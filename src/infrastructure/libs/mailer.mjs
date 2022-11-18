@@ -1,8 +1,7 @@
-const config = require("../../config/defaults");
-const nodemailMailgun = require("nodemailer-mailgun-transport");
-const nodemailer = require("nodemailer");
-const logger = require("pino")();
-const dotenv = require("dotenv").config();
+import nodemailMailgun from "nodemailer-mailgun-transport";
+import { createTransport } from "nodemailer";
+import pino from "pino";
+const logger = pino()
 const auth = {
   auth: {
     api_key: `${process.env.MAILGUN_API_KEY}`,
@@ -11,9 +10,9 @@ const auth = {
 }
 
 
-let transporter = nodemailer.createTransport(nodemailMailgun(auth));
+let transporter = createTransport(nodemailMailgun(auth));
 
-exports.sendWelcomeMail = async (email, full_name, link)=>{
+export async function sendWelcomeMail(email, full_name, link){
   let options = {
     from : `info-noreply@protrack.com`,
     to : `${email}`,
@@ -41,7 +40,7 @@ exports.sendWelcomeMail = async (email, full_name, link)=>{
   })
 }
 
-exports.passwordReset = async (email, full_name, link)=>{
+export async function passwordReset(email, full_name, link){
   let options = {
     from : `ogborogee@gmail.com`,
     to : `${email}`,
@@ -69,7 +68,7 @@ exports.passwordReset = async (email, full_name, link)=>{
     }
   })
 }
-exports.sendNewSubscriptionMail = async (email, full_name, plan, expiresIn, invoiceNumber)=>{
+export async function sendNewSubscriptionMail(email, full_name, plan, expiresIn, invoiceNumber){
   let options = {
     from :'"Protrack" <protrack@example.com>', // sender address
     to : `${email}`,

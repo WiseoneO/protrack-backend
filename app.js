@@ -1,19 +1,21 @@
-const express = require("express");
+import express, { json } from "express";
 const app = express()
 // const morgan = require("morgan");
-const config = require("./src/config/defaults")
-const helmet = require("helmet");
+import config from "./src/config/defaults.mjs";
+// const{ env as _env, projectName as _projectName } = config
+import helmet from "helmet";
 // const logger = require("pino")();
-const createError = require("http-errors");
-const connectDB = require("./src/infrastructure/database/mongoose");
-const authRoute = require("./src/interface/http/routes/authRoute");
-const userRoute = require("./src/interface/http/routes/userRoute"); 
-const taskRoute = require("./src/interface/http/routes/taskRoute");
-const subRoute = require("./src/interface/http/routes/subRoute");
-const cors = require('cors')
+import create_http_error from "http-errors";
+const { NotFound } = create_http_error;
+import {connectDB} from "./src/infrastructure/database/mongoose.mjs";
+import authRoute from "./src/interface/http/routes/authRoute.mjs";
+import userRoute from "./src/interface/http/routes/userRoute.mjs"; 
+import taskRoute from "./src/interface/http/routes/taskRoute.mjs";
+import subRoute from "./src/interface/http/routes/subRoute.mjs";
+import cors from 'cors';
 
 connectDB(app);
-app.use(express.json())
+app.use(json())
 app.use(cors());
 
 // helps secure our express app by setting various HTTP head099Mers
@@ -36,7 +38,7 @@ app.use("/api/v1/user/task", taskRoute);
 
 // Not found route
 app.use(async (req, res, next) => {
-    next(createError.NotFound());
+    next(NotFound());
 })
 
 // catch application errors

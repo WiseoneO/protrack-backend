@@ -1,27 +1,9 @@
-const router = require("express").Router();
-const {
-    createIndividualTask,
-    createTeamTask,
-    departmentTask,
-    addTeamMember,
-    addDepartmentMember,
-    removeTeamMember,
-    removeDepartmentMember,
-    updateIndividualTask,
-    updateTeamTask,
-    updatedepartmentTask,
-    deleteIndividualTask,
-    deleteTeamTask,
-    deleteDepartmentTask,
-    allUserTasks,
-    singleUserTasks,
-    allTeamTask,
-    specificTeamTask,
-    allDepartmentTask,
-    specificDepartmentTask} = require("../controllers/taskController");
-    const {checkTeamSub,checkOrganizationSub} = require('../utils/checkPremium');
+import express from 'express';
+const router = express.Router()
+import { createIndividualTask, createTeamTask, departmentTask, addTeamMember, addDepartmentMember, removeTeamMember, removeDepartmentMember, updateIndividualTask, updateTeamTask, updatedepartmentTask, deleteIndividualTask, deleteTeamTask, deleteDepartmentTask, allUserTasks, singleUserTasks, allTeamTask, specificTeamTask, allDepartmentTask, specificDepartmentTask } from "../controllers/taskController.mjs";
+import { checkTeamSub, checkOrganizationSub } from '../utils/checkPremium.mjs';
 
-const verifyToken= require("../middlewares/verifyUser")
+import verifyToken from "../middlewares/verifyUser.mjs";
 // Individual Task
 router.get("/", verifyToken,allUserTasks);
 router.get("/:taskId/single-task", verifyToken,singleUserTasks);
@@ -43,4 +25,4 @@ router.delete("/:taskId/delete-single-task", verifyToken, deleteIndividualTask);
 router.delete("/:taskId/delete-team-task", verifyToken,checkTeamSub, deleteTeamTask);
 router.delete("/:taskId/delete-department-task", verifyToken, checkOrganizationSub,deleteDepartmentTask);
 
-module.exports = router;
+export default router;

@@ -1,15 +1,15 @@
-const userModel = require("../../../infrastructure/database/models/user");
-const bcrypt = require("bcrypt");
-const config = require("../../../config/defaults");
-const {createUserSchema} = require("../validations/userValidation");
-const {sendWelcomeMail} = require("../../../infrastructure/libs/mailer");
-const cloudinary = require("../../../infrastructure/libs/cloudinary");
-const isValidObjectId = require("../utils/isValidObjectId")
+import userModel from "../../../infrastructure/database/models/User.mjs";
+import { hash, compare } from "bcrypt";
+import config from "../../../config/defaults.mjs";
+import { createUserSchema } from "../validations/userValidation.mjs";
+import { sendWelcomeMail } from "../../../infrastructure/libs/mailer.mjs";
+import {uploads} from "../../../infrastructure/libs/cloudinary.mjs";
 // const fs = require("fs");
-const {path} = require("path");
-const jwt = require("jsonwebtoken");
+import path from "path";
+import jsonwebtoken from "jsonwebtoken";
+const { sign, verify } = jsonwebtoken
 
-exports.signupUser = async (req, res)=>{
+export const signupUser = async (req, res)=>{
         try{
             let {
                 full_name,
@@ -32,7 +32,7 @@ exports.signupUser = async (req, res)=>{
                 if(isUser) throw new Error(`User with this email already exist`);
 
                 // hash Password
-                let hashedPassword = await bcrypt.hash(password, 12);
+                let hashedPassword = await hash(password, 12);
                 password = hashedPassword;
 
                 let user = await userModel.create({
@@ -44,7 +44,7 @@ exports.signupUser = async (req, res)=>{
                 
                 // creating an email verification token
                 const secret = config.userEmailSecret;
-                const token = jwt.sign({email: user.email}, `${secret}`, {
+                const token = sign({email: user.email}, `${secret}`, {
                     expiresIn: "1d"
                 });
 
@@ -76,7 +76,7 @@ exports.signupUser = async (req, res)=>{
 }
 
 // changePassword
-exports.changePassword = async (req, res)=>{
+export const changePassword = async (req, res)=> {
     try{
         const userId = req.user._id;
         console.log(userId);
@@ -91,10 +91,10 @@ exports.changePassword = async (req, res)=>{
             if(!user) throw new Error(`User not found`);
     
             // compare oldpassword
-            let verifyPassword = await bcrypt.compare(oldPassword, user.password);
+            let verifyPassword = await compare(oldPassword, user.password);
             if(!verifyPassword) throw new Error (`Password is incorrect!`);
 
-            let ChangedPassword = await bcrypt.hash(newPassword, 12);
+            let ChangedPassword = await hash(newPassword, 12);
             user.password = ChangedPassword;
 
             await user.save();
@@ -148,16 +148,16 @@ exports.changePassword = async (req, res)=>{
 // }
 
 // soft delete User
-exports.softDelete = async (req, res) =>{
+export async function softDelete(req, res){
 
 }
 
 // permanet delete
-exports.permanentDelete = async (req, res) =>{
+export async function permanentDelete(req, res){
 
 }
 
 // View trash
-exports.Trash = async (req, res) =>{
+export async function Trash(req, res){
     
 }
