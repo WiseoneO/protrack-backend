@@ -33,7 +33,7 @@ export async function sendWelcomeMail(email, full_name, link){
 
   transporter.sendMail(options, (err, info)=> {
     if(err){
-      logger.info(err);
+      logger.info(err.message);
     }else{
       logger.info(info)
     }

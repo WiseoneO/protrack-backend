@@ -1,39 +1,40 @@
 import userModel from "../../../infrastructure/database/models/User.mjs";
 import { hash, compare } from "bcrypt";
 import config from "../../../config/defaults.mjs";
-import { createUserSchema } from "../validations/userValidation.mjs";
+import { createUserSchema, changePasswordSchema } from "../validations/userValidation.mjs";
 import { sendWelcomeMail } from "../../../infrastructure/libs/mailer.mjs";
-import {uploads} from "../../../infrastructure/libs/cloudinary.mjs";
-// const fs = require("fs");
-import path from "path";
+// import {uploads} from "../../../infrastructure/libs/cloudinary.mjs";
 import jsonwebtoken from "jsonwebtoken";
 const { sign, verify } = jsonwebtoken
 
 export const signupUser = async (req, res)=>{
         try{
+            // validating inputs
+            const {error} = createUserSchema(req.body);
+            if(error){
+                return res.status(400).json({
+                    success : false,
+                    message : error.details[0].message
+                });
+            }
+            // Receiving user inputs
             let {
                 full_name,
                 phoneNumber: {phoneNo, countryCode},
                 email,
-                password ,
+                password,
+                confirmpassword
                 } = req.body;
 
-                // validating inputs
-                const {error} = createUserSchema(req.body);
-                if(error){
-                    return res.status(400).json({
-                        success : false,
-                        message : error.details[0].message
-                    });
-                }
-    
                 // check if user exist
                 let isUser = await userModel.findOne({email :email});
-                if(isUser) throw new Error(`User with this email already exist`);
+                if(isUser) return res.status(401).json({
+                    success : false,
+                    msg : `Email already exist`
+                });
 
                 // hash Password
-                let hashedPassword = await hash(password, 12);
-                password = hashedPassword;
+                password = await hash(password, 12);
 
                 let user = await userModel.create({
                     full_name,
@@ -48,14 +49,13 @@ export const signupUser = async (req, res)=>{
                     expiresIn: "1d"
                 });
 
-                // console.log(token)
-
                 // creating an eamil verificationlink
                 const link = `http://localhost:3000/protrack.com/api/v1/auth/verify/${user._id}/${token}`;
+                console.log(link)
                 try{
                    await sendWelcomeMail(email, full_name, link);
                 }catch(error){
-                    throw new Error(`ac`)
+                    throw new Error(`Email not sent`)
                 }
                   
 
@@ -78,32 +78,44 @@ export const signupUser = async (req, res)=>{
 // changePassword
 export const changePassword = async (req, res)=> {
     try{
+        // validating inputs
+        const {error} = changePasswordSchema(req.body);
+        if(error){
+            return res.status(400).json({
+                success : false,
+                message : error.details[0].message
+            });
+        }
         const userId = req.user._id;
-        console.log(userId);
-
         let {oldPassword, newPassword} = req.body;
 
         const user = await userModel.findOne({
                 _id : userId,
                 isDeleted : false,
-            })
-            // console.log(user);
-            if(!user) throw new Error(`User not found`);
+            },
+            {password : 0}
+            );
+
+            if(!user) return res.status(400).json({
+                success : false,
+                msg : `User not found!`
+            });
     
             // compare oldpassword
             let verifyPassword = await compare(oldPassword, user.password);
-            if(!verifyPassword) throw new Error (`Password is incorrect!`);
+            if(!verifyPassword) return res.status(400).json({
+                success : false,
+                msg : `Password is incorrect`
+            });
 
-            let ChangedPassword = await hash(newPassword, 12);
-            user.password = ChangedPassword;
+            // setting the new Password
+            user.password = await hash(newPassword, 12);
 
             await user.save();
             res.status(200).json({
                 success: true,
                 msg: `Password updated successfully!`,
-                // data: user,
               });
-
     }catch(error){
         if (error instanceof Error) {
             res.status(500)
@@ -148,16 +160,16 @@ export const changePassword = async (req, res)=> {
 // }
 
 // soft delete User
-export async function softDelete(req, res){
+// export async function softDelete(req, res){
 
-}
+// }
 
-// permanet delete
-export async function permanentDelete(req, res){
+// // permanet delete
+// export async function permanentDelete(req, res){
 
-}
+// }
 
 // View trash
-export async function Trash(req, res){
+// export async function Trash(req, res){
     
-}
+// }

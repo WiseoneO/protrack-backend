@@ -2,7 +2,7 @@
 import joi from "joi";
 
 export function createTaskSchema(team){
-    const schema = object({
+    const schema = joi.object({
         title: joi.string().required().min(4),
         description: joi.string().required().min(4),
         department: joi.string().required().min(1),
@@ -15,7 +15,7 @@ export function createTaskSchema(team){
 }
 
 export function edit(team){
-    const schema = object({
+    const schema = joi.object({
         status: joi.string().required(),
     }).unknown();
     return schema.validate(team);

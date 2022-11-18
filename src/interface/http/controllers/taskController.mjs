@@ -21,7 +21,6 @@ export const createIndividualTask = async (req, res)=>{
                 message: error.details[0].message
             });
         }
-        try{
             // create individual task in the database
             const individualTask = await individualModel.create({
                 title,
@@ -37,15 +36,12 @@ export const createIndividualTask = async (req, res)=>{
                 msg: `Task created successfully.`,
                 data: individualTask,
             });
-        }catch(error){
-            throw error;
-        }
     } catch (error) {
         if (error instanceof Error) {
-            res.status(500).json({
-                    success: false,
-                    msg: `${error}`
-                });
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                success: false,
+                msg: `${error.message}`
+            });
         }
     }
 }
@@ -63,7 +59,7 @@ export const createTeamTask = async(req, res)=>{
                 message: error.details[0].message
             });
         }
-        // creat
+        // create Task
         const task = await teamModel.create({
             title,
             description,
@@ -73,18 +69,18 @@ export const createTeamTask = async(req, res)=>{
             start_date,
             created_By : req.user._id
         });
-        await task.members.push({memberId : req.user._id, role: 'admin'});
+        task.members.push({memberId : req.user._id, role: 'admin'});
         await task.save()
             res.status(201).json({
             success : true,
-            msg: ` Team task created successfully`,
+            msg: `Team task created successfully`,
             data: task,
         });
     }catch(error){
         if(error instanceof Error){
-            res.status(500).json({
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 success: false,
-                msg: `${error}`
+                msg: `${error.message}`
             });
         }
     } 
@@ -92,9 +88,18 @@ export const createTeamTask = async(req, res)=>{
 
 // Create department Task
 export const departmentTask = async (req, res)=>{
-    const {title,description,department,status,time_frame,start_date} = req.body;
-
     try{
+        // Joi Task Schema Validation 
+        const {error} = createTaskSchema(req.body);
+        if (error) {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                success: false,
+                message: error.details[0].message
+            });
+        }
+
+        const {title,description,department,status,time_frame,start_date} = req.body;
+
         const task = await departmentModel.create({
             title,
             description,
@@ -105,19 +110,19 @@ export const departmentTask = async (req, res)=>{
             created_By : req.user._id
         });
 
-        await task.members.push({memberId : req.user._id, role : "admin"});
+        task.members.push({ memberId: req.user._id, role: "admin" });
         await task.save()
             res.status(201).json({
             success : true,
-            msg: ` Department task created successfully`,
+            msg: `Department task created successfully`,
             data: task,
         });
         
     }catch(error){
         if(error instanceof Error){
-            res.status(500).json({
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 success: false,
-                msg: `${error}`
+                msg: `${error.message}`
             });
         }
     }
@@ -129,19 +134,29 @@ export const updateIndividualTask = async (req, res)=>{
         const creatorId = req.user._id;
         const individualTaskId = req.params.id;
         let payload = req.body;
+
         const { error} = edit(payload);
         if (error) {
-            return res.status(400).json({
+            return res.status(StatusCodes.BAD_REQUEST).json({
                 success: false,
                 message: error.details[0].message
             });
         }
         const editTask = await individualModel.findById({_id : individualTaskId});
-        if(!editTask) throw new Error (`Task not found!`);
+        if(!editTask) return res
+                .status(StatusCodes.NOT_FOUND)
+                .json({
+                    success: false,
+                    msg: `Task not found`
+            });
 
         const taskAdmin =  await individualModel.findOneAndUpdate({created_By : creatorId},payload, {new : true});
-        if (!taskAdmin) throw new Error('Admin with this ID does not exist');
-
+        if (!taskAdmin) return res
+            .status(StatusCodes.NOT_FOUND)
+            .json({
+                success: false,
+                msg: `Admin does not exist`
+            });
         await taskAdmin.save();
         res.status(201).json({
             success : true,
@@ -149,14 +164,12 @@ export const updateIndividualTask = async (req, res)=>{
             data: taskAdmin,
         });
 
-
     }catch(error){
         if(error instanceof Error){
-            res
-                .status(500)
+            res.status(500)
                 .json({
                     success: false,
-                    msg: `${error}`
+                    msg: `${error.message}`
                 });
             }
     }
@@ -169,43 +182,54 @@ export const updateTeamTask = async (req, res)=>{
         const payload = req.body;
         // Joi Task Schema Validation 
         const {error} = createTaskSchema(payload);
-        if (error) {
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                success: false,
+        if (error) return res
+            .status(StatusCodes.BAD_REQUEST)
+            .json({
+                success: false, 
                 message: error.details[0].message
             });
-        }
-        try{
-            // verify task
-            const verifyTask = await teamModel.findById(teamTaskId);
-            if(!verifyTask) throw Error ('Task not found!');
 
-            // checking for the role of the current user
-            const currentUser = verifyTask.members.find((member) => member.memberId === req.user._id);
-            if(!currentUser) throw Error ('You are not a member or an admin');
+        // verify task
+        const verifyTask = await teamModel.findById(teamTaskId);
+        if(!verifyTask) return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({
+            success: false,
+            msg: `Task not found`
+        });
 
-            // authorize admins this operation
-            if(currentUser.role !== 'admin') throw Error ('you are not authorized');
+        // checking for the role of the current user
+        const currentUser = verifyTask.members.find((member) => member.memberId === req.user._id);
+        if(!currentUser) return res
+            .status(StatusCodes.NOT_FOUND)
+            .json({
+                success: false,
+                msg: `You are not a member of this team.`
+            });
+
+        // authorize admins for this operation
+        if(currentUser.role !== 'admin') return res
+            .status(StatusCodes.UNAUTHORIZED)
+            .json({
+                success: false,
+                msg: `You are not authorized`
+            });
 
             const updatedTask = await teamModel.findOneAndUpdate({_id : teamTaskId},payload,{new: true});
 
-            res.status(StatusCodes.ACCEPTED).json({
+            return res.status(StatusCodes.ACCEPTED).json({
                 success : true,
                 msg : 'Task updated successfully',
                 data : updatedTask
             });
-            
-        }catch(error){
-            throw error;
-        }
     }catch(error){
         if(error instanceof Error){
-            res.status(500)
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR)
                 .json({
-                    success: false,
-                    msg: `${error}`
-                });
-            }
+                success: false,
+                msg: `${error.message}`
+            });
+        }
     }
 }
 // Update department Task status
@@ -222,42 +246,43 @@ export const updatedepartmentTask = async (req, res)=>{
                 message: error.details[0].message
             });
         }
-        try{
-            // verify task
-            const verifyTask = await departmentModel.findById(teamTaskId);
-            if(!verifyTask) throw Error ('Task not found!');
+        // verify task
+        const verifyTask = await departmentModel.findById(teamTaskId);
+        if(!verifyTask){
+            return res.status(StatusCodes.NOT_FOUND).json({
+            success: false,
+            msg: `Task not found`
+        });}
 
-            // checking for the role of the current user
-            const currentUser = verifyTask.members.find((member) => member.memberId === req.user._id);
-            if(!currentUser) throw Error ('You are not a member or an admin');
+        // checking for the role of the current user
+        const currentUser = verifyTask.members.find((member) => member.memberId === req.user._id);
+        if(!currentUser){
+            return res.status(StatusCodes.NOT_FOUND).json({
+            success: false,
+            msg: `You are not a member of this team`
+        });}
 
+        // authorize admins this operation
+        if(currentUser.role !== 'admin'){
+            return res.status(StatusCodes.UNAUTHORIZED).json({
+            success: false,
+            msg: `You are not authorized.`
+        });}
 
-            // authorize admins this operation
-            if(currentUser.role !== 'admin') throw Error ('you are not authorized');
+        const updatedTask = await departmentModel.findOneAndUpdate({_id : teamTaskId},payload,{new: true});
 
-            const updatedTask = await departmentModel.findOneAndUpdate({_id : teamTaskId},payload,{new: true});
-
-            res.status(StatusCodes.ACCEPTED).json({
-                success : true,
-                msg : 'Task updated successfully',
-                data : updatedTask
-            })
-            
-        }catch(error){
-            throw error;
-        }
-        
-        
-
-       
-
+        return res.status(StatusCodes.ACCEPTED).json({
+            success : true,
+            msg : 'Task updated successfully',
+            data : updatedTask
+        })
     }catch(error){
         if(error instanceof Error){
             res
-                .status(500)
+                .status(StatusCodes.INTERNAL_SERVER_ERROR)
                 .json({
                     success: false,
-                    msg: `${error}`
+                    msg: `${error.message}`
                 });
             }
     }
@@ -268,49 +293,68 @@ export const addTeamMember = async(req, res, next)=>{
     try{
         const userId = req.params.id;
         const taskId = req.params.taskId;
-        try{
-            // verifying params values
-            const verifyUser = await userModel.findById(userId);
-            if(!verifyUser) throw Error ('User not found!');
-            const verifyTask = await teamModel.findById(taskId);
-            if(!verifyTask) throw Error ('Task not found');
 
-            const ObjectToFind = userId;
-            const isObjectPresent= verifyTask.members.find((member) => member.memberId === ObjectToFind);
-            const currentUser = verifyTask.members.find((member) => member.memberId === req.user._id);
-            if(!currentUser) throw Error ('You are not a member or an admin');
-
-            // Authorizing admins to perform this operation
-            if(currentUser.role !=='admin') 
-                return res.status(StatusCodes.UNAUTHORIZED).json({
-                    success : false,
-                    msg : 'You are not authorized!'
-                });
-            if(!isObjectPresent && verifyTask.members.length < 7){
-                await verifyTask.updateOne({$push : {members : {memberId: userId, role : 'member'}}});
-                    res.status(StatusCodes.OK).json({
-                        success : true,
-                        msg: 'New user added',
-                        data : verifyTask
-                    });
-            }else if(verifyTask.members.length >= 7){
-                    throw Error ('Team limit reached');
-                }else{
-                    res.status(StatusCodes.OK).json({
-                        success : true,
-                        msg : `${verifyUser.email} is already a member`
-                    });
-                }
-        }catch(error){
-            throw error;
+        // verifying params values
+        const verifyUser = await userModel.findById(userId);
+        if(!verifyUser){ 
+            return res.status(StatusCodes.NOT_FOUND)
+            .json({
+                success: false,
+                msg:'User Not found'
+            })
         }
+        const verifyTask = await teamModel.findById(taskId);
+        if(!verifyTask){ 
+            return res.status(StatusCodes.NOT_FOUND)
+            .json({
+                success: false,
+                msg:'Task Not found'
+            })   
+        }
+        const ObjectToFind = userId;
+        const isObjectPresent= verifyTask.members.find((member) => member.memberId === ObjectToFind);
+        const currentUser = verifyTask.members.find((member) => member.memberId === req.user._id);
+        if(!currentUser){ 
+            return res.status(StatusCodes.BAD_REQUEST)
+            .json({
+                success: false,
+                msg:'You are not a member or an admin'})
+            }
+
+        // Authorizing admins to perform this operation
+        if(currentUser.role !=='admin'){
+            return res.status(StatusCodes.UNAUTHORIZED).json({
+                success : false,
+                msg : 'You are not authorized!'
+            });
+        }
+
+        if(!isObjectPresent && verifyTask.members.length < 7){
+            await verifyTask.updateOne({$push : {members : {memberId: userId, role : 'member'}}});
+                res.status(StatusCodes.OK).json({
+                    success : true,
+                    msg: 'New user added',
+                    data : verifyTask
+                });
+        }else if(verifyTask.members.length >= 7){
+               return res.status(StatusCodes.BAD_REQUEST)
+               .json({
+                success: 'false', 
+                msg:'Team limit reached'
+            });
+            }else{
+                res.status(StatusCodes.OK).json({
+                    success : true,
+                    msg : `${verifyUser.email} is already a member`
+                });
+            }
     }catch(error){
         if(error instanceof Error){
             res.status(500).json({
-                    success: false,
-                    msg: `${error}`
-                });
-            }
+                success: false,
+                msg: `${error.message}`
+            });
+        }
     }
 }
 // Add department Members

@@ -3,9 +3,9 @@ const router = express.Router()
 import { login, verifyToken, sendPasswordLink, resetUserPassword } from "../controllers/authContorller.mjs";
 
 
-router.route("/login").post(login)
-router.route("/verify/:id/:token").get(verifyToken)
-router.route("/forgot-password/user/").post(sendPasswordLink)
-router.route("/user/reset/:id/:token").post(resetUserPassword)
+router.post("/login", login)
+router.get("/verify/:id/:token", verifyToken)
+router.post("/forgot-password/user/", sendPasswordLink)
+router.post("/user/reset/:id/:token", resetUserPassword)
 
 export default router
