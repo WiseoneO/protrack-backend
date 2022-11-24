@@ -3,8 +3,11 @@ import { hash, compare } from "bcrypt";
 import config from "../../../config/defaults.mjs";
 import { createUserSchema, changePasswordSchema } from "../validations/userValidation.mjs";
 import { sendWelcomeMail } from "../../../infrastructure/libs/mailer.mjs";
-// import {uploads} from "../../../infrastructure/libs/cloudinary.mjs";
+import {uploads} from "../../../infrastructure/libs/cloudinary.mjs";
 import jsonwebtoken from "jsonwebtoken";
+import {unlinkSync} from 'fs'
+import { StatusCodes } from "http-status-codes";
+import path from "path";
 const { sign, verify } = jsonwebtoken
 
 export const signupUser = async (req, res)=>{
@@ -122,6 +125,40 @@ export const changePassword = async (req, res)=> {
               .json({ success: false, msg: `${error}` });
           }
         }
+}
+
+// Upload profile image
+export const avatar = async (req, res)=>{
+    try{
+        const userId = req.params.id;
+        const payload = req.file;
+        const uploader = async (path)=>await uploads(path, 'protrack-user-avatar');
+
+        const url = [];
+        const file = payload;
+
+        const { path } = file;
+        const newPath = await uploader(path);
+
+        url.push(newPath.url);
+        unlinkSync(path);
+
+        const user = await userModel.findOne({_id: userId});
+        user.avatar = url.toString();
+        await user.save();
+
+        console.log('saved')
+
+
+    }catch(error){
+        if( error instanceof Error){
+            console.log(error.stack)
+            res.status(500).json({
+                success : false,
+                msg: error.stack
+            })
+        }
+    }
 }
 
 // UPDATE USER PROFILE

@@ -7,7 +7,7 @@ const { connect } = mongoose;
 export const connectDB =  async (app)=>{
     try{
         logger.info(`Connecting to MongDB database ...`);
-        connect(config.localMongod,
+        connect(config.liveMongod,
             () => {
                 app.listen(config.port, () => {
                     logger.info(`Server started on port ${config.port}`);
