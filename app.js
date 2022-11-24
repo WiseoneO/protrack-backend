@@ -1,8 +1,6 @@
 import express, { json } from "express";
 const app = express()
-// const morgan = require("morgan");
 import config from "./src/config/defaults.mjs";
-// const{ env as _env, projectName as _projectName } = config
 import helmet from "helmet";
 // const logger = require("pino")();
 import create_http_error from "http-errors";

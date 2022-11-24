@@ -1,5 +1,5 @@
 import cloudinary from "cloudinary";
-const { config, uploader } = cloudinary
+const { config, uploader } = cloudinary.v2
 
 config({
     cloud_name:process.env.CLOUD_NAME,
