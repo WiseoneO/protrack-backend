@@ -1,6 +1,7 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+const {Schema, model} = mongoose;
 
-const memberSchema = new mongoose.Schema({
+const memberSchema = new Schema({
     memberId : {
         type : String
     },
@@ -11,17 +12,14 @@ const memberSchema = new mongoose.Schema({
     },
 })
 
-const teamSchema = new mongoose.Schema({
+const teamSchema = new Schema({
     created_By: {
         type: String,
         ref: 'User',
     },
     
     members : [memberSchema],
-    // members : {
-    //     type : Array,
-    //     default: []
-    // },
+
     title : {
         type: String
     },
@@ -52,6 +50,4 @@ const teamSchema = new mongoose.Schema({
     },
 )
 
-const TeamTaskModel = mongoose.model("TeamTask", teamSchema);
-
-module.exports = TeamTaskModel;
+export default model("TeamTaskModel", teamSchema);

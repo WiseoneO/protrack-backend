@@ -1,6 +1,7 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+const {Schema, model} = mongoose;
 
-const individualSchema = new mongoose.Schema({
+const individualSchema = new Schema({
     created_By: {
         type: String,
         ref: 'User',
@@ -38,6 +39,5 @@ const individualSchema = new mongoose.Schema({
     },
 )
 
-const IndividualTaskModel = mongoose.model("Individual", individualSchema);
+export default model("IndividualTaskModel", individualSchema);
 
-module.exports = IndividualTaskModel;

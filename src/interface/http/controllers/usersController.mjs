@@ -1,39 +1,43 @@
-const userModel = require("../../../infrastructure/database/models/user");
-const bcrypt = require("bcrypt");
-const config = require("../../../config/defaults");
-const {createUserSchema} = require("../validations/userValidation");
-const {sendWelcomeMail} = require("../../../infrastructure/libs/mailer");
-const cloudinary = require("../../../infrastructure/libs/cloudinary");
-const isValidObjectId = require("../utils/isValidObjectId")
-// const fs = require("fs");
-const {path} = require("path");
-const jwt = require("jsonwebtoken");
+import userModel from "../../../infrastructure/database/models/User.mjs";
+import { hash, compare } from "bcrypt";
+import config from "../../../config/defaults.mjs";
+import { createUserSchema, changePasswordSchema } from "../validations/userValidation.mjs";
+import { sendWelcomeMail } from "../../../infrastructure/libs/mailer.mjs";
+import {uploads} from "../../../infrastructure/libs/cloudinary.mjs";
+import jsonwebtoken from "jsonwebtoken";
+import {unlinkSync} from 'fs'
+import { StatusCodes } from "http-status-codes";
+import path from "path";
+const { sign, verify } = jsonwebtoken
 
-exports.signupUser = async (req, res)=>{
+export const signupUser = async (req, res)=>{
         try{
+            // validating inputs
+            const {error} = createUserSchema(req.body);
+            if(error){
+                return res.status(400).json({
+                    success : false,
+                    message : error.details[0].message
+                });
+            }
+            // Receiving user inputs
             let {
                 full_name,
                 phoneNumber: {phoneNo, countryCode},
                 email,
-                password ,
+                password,
+                confirmpassword
                 } = req.body;
 
-                // validating inputs
-                const {error} = createUserSchema(req.body);
-                if(error){
-                    return res.status(400).json({
-                        success : false,
-                        message : error.details[0].message
-                    });
-                }
-    
                 // check if user exist
                 let isUser = await userModel.findOne({email :email});
-                if(isUser) throw new Error(`User with this email already exist`);
+                if(isUser) return res.status(401).json({
+                    success : false,
+                    msg : `Email already exist`
+                });
 
                 // hash Password
-                let hashedPassword = await bcrypt.hash(password, 12);
-                password = hashedPassword;
+                password = await hash(password, 12);
 
                 let user = await userModel.create({
                     full_name,
@@ -44,18 +48,17 @@ exports.signupUser = async (req, res)=>{
                 
                 // creating an email verification token
                 const secret = config.userEmailSecret;
-                const token = jwt.sign({email: user.email}, `${secret}`, {
+                const token = sign({email: user.email}, `${secret}`, {
                     expiresIn: "1d"
                 });
 
-                // console.log(token)
-
                 // creating an eamil verificationlink
                 const link = `http://localhost:3000/protrack.com/api/v1/auth/verify/${user._id}/${token}`;
+                console.log(link)
                 try{
                    await sendWelcomeMail(email, full_name, link);
                 }catch(error){
-                    throw new Error(`ac`)
+                    throw new Error(`Email not sent`)
                 }
                   
 
@@ -76,40 +79,86 @@ exports.signupUser = async (req, res)=>{
 }
 
 // changePassword
-exports.changePassword = async (req, res)=>{
+export const changePassword = async (req, res)=> {
     try{
+        // validating inputs
+        const {error} = changePasswordSchema(req.body);
+        if(error){
+            return res.status(400).json({
+                success : false,
+                message : error.details[0].message
+            });
+        }
         const userId = req.user._id;
-        console.log(userId);
-
         let {oldPassword, newPassword} = req.body;
 
         const user = await userModel.findOne({
                 _id : userId,
                 isDeleted : false,
-            })
-            // console.log(user);
-            if(!user) throw new Error(`User not found`);
+            },
+            {password : 0}
+            );
+
+            if(!user) return res.status(400).json({
+                success : false,
+                msg : `User not found!`
+            });
     
             // compare oldpassword
-            let verifyPassword = await bcrypt.compare(oldPassword, user.password);
-            if(!verifyPassword) throw new Error (`Password is incorrect!`);
+            let verifyPassword = await compare(oldPassword, user.password);
+            if(!verifyPassword) return res.status(400).json({
+                success : false,
+                msg : `Password is incorrect`
+            });
 
-            let ChangedPassword = await bcrypt.hash(newPassword, 12);
-            user.password = ChangedPassword;
+            // setting the new Password
+            user.password = await hash(newPassword, 12);
 
             await user.save();
             res.status(200).json({
                 success: true,
                 msg: `Password updated successfully!`,
-                // data: user,
               });
-
     }catch(error){
         if (error instanceof Error) {
             res.status(500)
               .json({ success: false, msg: `${error}` });
           }
         }
+}
+
+// Upload profile image
+export const avatar = async (req, res)=>{
+    try{
+        const userId = req.params.id;
+        const payload = req.file;
+        const uploader = async (path)=>await uploads(path, 'protrack-user-avatar');
+
+        const url = [];
+        const file = payload;
+
+        const { path } = file;
+        const newPath = await uploader(path);
+
+        url.push(newPath.url);
+        unlinkSync(path);
+
+        const user = await userModel.findOne({_id: userId});
+        user.avatar = url.toString();
+        await user.save();
+
+        console.log('saved')
+
+
+    }catch(error){
+        if( error instanceof Error){
+            console.log(error.stack)
+            res.status(500).json({
+                success : false,
+                msg: error.stack
+            })
+        }
+    }
 }
 
 // UPDATE USER PROFILE
@@ -148,16 +197,16 @@ exports.changePassword = async (req, res)=>{
 // }
 
 // soft delete User
-exports.softDelete = async (req, res) =>{
+// export async function softDelete(req, res){
 
-}
+// }
 
-// permanet delete
-exports.permanentDelete = async (req, res) =>{
+// // permanet delete
+// export async function permanentDelete(req, res){
 
-}
+// }
 
 // View trash
-exports.Trash = async (req, res) =>{
+// export async function Trash(req, res){
     
-}
+// }

@@ -1,10 +1,10 @@
-const Subscription = require("../../../infrastructure/database/models/subscription");
-const HTTP_STATUS = require('http-status-codes');
+import SubscriptionModel from "../../../infrastructure/database/models/subscription.mjs";
+import HTTP_STATUS from 'http-status-codes';
 
-const checkTeamSub = async (req, res, next)=>{
+export const checkTeamSub = async (req, res, next)=>{
     const userId = req.user._id;
     let today = new Date();
-    await Subscription.findOne({
+    await SubscriptionModel.findOne({
         userId,
         end_date : {$gt: new Date(today)},
         taskType : "Team"
@@ -22,13 +22,13 @@ const checkTeamSub = async (req, res, next)=>{
             });
     })
 }
-const checkOrganizationSub = async (req, res, next)=>{
+export const checkOrganizationSub = async (req, res, next)=>{
     const userId = req.user._id;
     let today = new Date();
-    await Subscription.findOne({
+    await SubscriptionModel.findOne({
         userId,
         end_date : {$gt: new Date(today)},
-        taskType : "Oganization"
+        taskType : "Organization"
         
     })
     .then((isSubscribed)=>{
@@ -44,4 +44,4 @@ const checkOrganizationSub = async (req, res, next)=>{
     })
 }
 
-module.exports = {checkTeamSub,checkOrganizationSub}
+export default {checkTeamSub,checkOrganizationSub}

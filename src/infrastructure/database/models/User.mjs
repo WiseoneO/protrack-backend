@@ -1,6 +1,7 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+const {Schema, model} = mongoose;
 
-const UserSchema = new mongoose.Schema({
+const UserSchema = new Schema({
     full_name : {
         type:String,
         required : true
@@ -36,11 +37,7 @@ const UserSchema = new mongoose.Schema({
                 'Banking',
                 'Education/Training',
                 'Others'
-                ]
-    },
-    team: {
-        type  : Array,
-        default : [], 
+            ]
     },
     job_title : {
         type : String,
@@ -65,6 +62,5 @@ const UserSchema = new mongoose.Schema({
 }, {timestamps: true}
 );
 
-const UserModel = mongoose.model("User", UserSchema);
+export default model("UserModel", UserSchema);
 
-module.exports = UserModel;
