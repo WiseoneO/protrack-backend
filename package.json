@@ -1,15 +1,15 @@
 {
-  "type": "module",
   "name": "protrack-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "app.mjs",
   "engine":{
     "node": "18.x"
   },
   "scripts": {
+    "start": "node app.mjs",
     "test": "mocha",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.mjs"
   },
   "author": "wiseone",
   "license": "ISC",

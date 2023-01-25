@@ -29,7 +29,7 @@ app.use(cors());
 app.use(helmet());
 
 // BASE ROUTE
-app.get("/api/v1/", (req, res, next)=>{
+app.get("/", (req, res, next)=>{
     res.status(200).json({
      message : "API v1 is running",
      env: config.env,
