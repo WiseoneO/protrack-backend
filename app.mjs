@@ -2,6 +2,10 @@ import express, { json } from "express";
 let app = express()
 import config from "./src/config/defaults.mjs";
 import helmet from "helmet";
+import rateLimit from 'express-rate-limit';
+import mongoSanitize  from 'express-mongo-sanitize';
+import  xss from 'xss-clean';
+import hpp from 'hpp';
 // const logger = require("pino")();
 import create_http_error from "http-errors";
 const { NotFound } = create_http_error;
@@ -27,6 +31,25 @@ app.use(cors());
 
 // helps secure our express app by setting various HTTP head099Mers
 app.use(helmet());
+
+//   Sanitize Data
+app.use(mongoSanitize());
+
+// Prevent XSS attack
+app.use(xss())
+
+// Prevent parameter pollution
+app.use(hpp({
+    whitelist: ['position']
+}));
+
+//   Rate limiting
+const limiter = rateLimit({
+	windowMs: 10 * 60 * 1000, // 10 minutes
+	max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+})
+// Apply the rate limiting middleware to all requests
+app.use(limiter);
 
 // BASE ROUTE
 app.get("/", (req, res, next)=>{
